@@ -234,22 +234,102 @@
         .hud-right {
             display: flex;
             align-items: center;
-            gap: 0.65rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 0.55rem;
         }
 
         .score-pill {
             background: linear-gradient(135deg, var(--wood-dark) 0%, var(--wood-main) 100%);
             border: 1.5px solid var(--gold-main);
             border-radius: 8px;
-            padding: 0.3rem 0.75rem;
+            padding: 0.32rem 0.7rem;
             display: flex;
             align-items: center;
-            gap: 0.45rem;
+            gap: 0.4rem;
             font-family: var(--font-mono);
             font-weight: 700;
-            font-size: 0.9rem;
+            font-size: 0.84rem;
             color: var(--gold-bright);
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+        }
+
+        /* Resource Meters (Life Points & Hint Points) */
+        .resource-pill {
+            background: rgba(8, 14, 26, 0.85);
+            border: 1.5px solid rgba(212, 175, 55, 0.45);
+            border-radius: 8px;
+            padding: 0.25rem 0.6rem;
+            min-width: 148px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.65);
+            transition: var(--transition-fast);
+        }
+
+        .resource-pill-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.4rem;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            color: var(--cream-light);
+        }
+
+        .resource-bar-track {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 999px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .resource-bar-fill {
+            height: 100%;
+            width: 100%;
+            border-radius: 999px;
+            transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.3s ease;
+        }
+
+        .resource-bar-fill.life-fill {
+            background: linear-gradient(90deg, #2b7a4b 0%, #52b788 100%);
+        }
+
+        .resource-bar-fill.hint-fill {
+            background: linear-gradient(90deg, var(--gold-dark) 0%, var(--gold-bright) 100%);
+        }
+
+        /* Caution & Critical Resource States */
+        .resource-pill.warning-state {
+            border-color: #f59f00;
+        }
+
+        .resource-pill.warning-state .resource-bar-fill {
+            background: linear-gradient(90deg, #d9480f 0%, #fcc419 100%);
+        }
+
+        .resource-pill.critical-state {
+            border-color: var(--red-light);
+            background: rgba(92, 18, 18, 0.55);
+            animation: pulseCriticalBorder 1.6s infinite ease-in-out;
+        }
+
+        .resource-pill.critical-state .resource-pill-top {
+            color: #ffc9c9;
+        }
+
+        .resource-pill.critical-state .resource-bar-fill {
+            background: linear-gradient(90deg, var(--red-dark) 0%, var(--red-light) 100%);
+        }
+
+        @keyframes pulseCriticalBorder {
+            0%, 100% { box-shadow: 0 0 0 rgba(255, 107, 107, 0); }
+            50% { box-shadow: 0 0 12px rgba(255, 107, 107, 0.55); }
         }
 
         /* Evidence Board Collapsible Bar */
@@ -1527,28 +1607,6 @@
             letter-spacing: 0.5px;
         }
 
-        .btn-reroll-inline {
-            background: var(--navy-main);
-            color: var(--gold-bright);
-            border: 1.5px solid var(--gold-main);
-            border-radius: 6px;
-            padding: 0.32rem 0.68rem;
-            font-family: var(--font-sans);
-            font-size: 0.78rem;
-            font-weight: 700;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            transition: var(--transition-fast);
-        }
-
-        .btn-reroll-inline:hover {
-            background: var(--gold-main);
-            color: var(--navy-deepest);
-            transform: translateY(-1px);
-        }
-
         /* Responsive Adjustments */
         @media (max-width: 768px) {
             .detective-desk-frame {
@@ -1570,6 +1628,14 @@
             }
             .hud-container {
                 justify-content: center;
+            }
+            .hud-right {
+                justify-content: center;
+                width: 100%;
+            }
+            .resource-pill {
+                min-width: 132px;
+                flex: 1;
             }
             .mode-cards-grid {
                 grid-template-columns: 1fr;
@@ -1615,24 +1681,46 @@
                 <div class="step-node" data-step="6" title="Tahap 6: Kasus Selesai">6</div>
             </nav>
 
-            <!-- Mode Switcher, Randomizer, Score & Audio Controls -->
+            <!-- Mode Switcher, Resources (Nyawa, Hint, Skor) & Audio Controls -->
             <div class="hud-right">
-                <div class="hud-mode-group" title="Pilih Tingkat Kesulitan (Mengacak Kasus Baru)">
+                <div class="hud-mode-group" title="Pilih Tingkat Kesulitan Investigasi">
                     <button class="hud-mode-btn active-easy" id="hudBtnEasy">EASY</button>
                     <button class="hud-mode-btn" id="hudBtnHard">HARD</button>
                 </div>
-                <button class="btn-hud-nav" id="btnHudRandomize" title="Acak Varian Soal Baru Sekarang">
-                    &#127922; Soal Baru
-                </button>
-                <div class="score-pill" title="Skor Investigasi Saat Ini">
+
+                <!-- Life Points Indicator -->
+                <div class="resource-pill" id="hudLifePill" title="Poin Nyawa Detektif (Berkurang saat jawaban salah)">
+                    <div class="resource-pill-top">
+                        <span>&#10084;&#65039; NYAWA:</span>
+                        <span id="hudLifeValue">100/100</span>
+                    </div>
+                    <div class="resource-bar-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" id="hudLifeProgress">
+                        <div class="resource-bar-fill life-fill" id="hudLifeBar"></div>
+                    </div>
+                </div>
+
+                <!-- Hint Points Indicator -->
+                <div class="resource-pill" id="hudHintPill" title="Hint Points (Resource untuk membuka petunjuk)">
+                    <div class="resource-pill-top">
+                        <span>&#128161; HINT POINTS:</span>
+                        <span id="hudHintValue">100/100</span>
+                    </div>
+                    <div class="resource-bar-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" id="hudHintProgress">
+                        <div class="resource-bar-fill hint-fill" id="hudHintBar"></div>
+                    </div>
+                </div>
+
+                <!-- Main Investigation Score -->
+                <div class="score-pill" title="Skor Investigasi Utama">
                     <span>&#9733; SKOR:</span>
                     <span id="hudScoreValue">100</span>
                 </div>
+
                 <button class="btn-hud-nav" id="btnHowToPlayHud" title="Petunjuk Bermain">
                     ? Panduan
                 </button>
-                <button class="btn-hud-nav" id="btnToggleAudio" title="Aktifkan/Matikan Efek Suara">
-                    &#128266; ON
+                <button class="btn-hud-nav" id="btnToggleAudio" title="Aktifkan/Matikan Musik Latar (BGM) dan Efek Suara">
+                    &#128266; Audio: ON
                 </button>
             </div>
         </div>
@@ -1781,7 +1869,8 @@
                                 </div>
                                 <p class="mode-card-desc">
                                     • <strong>Sandi Caesar:</strong> Kata 4–5 huruf, geseran kunci 1–5 posisi.<br>
-                                    • <strong>Komposisi Fungsi:</strong> Fungsi linear <code>(f &#8728; g)(x)</code> dengan koefisien ramah pemula.
+                                    • <strong>Komposisi Fungsi:</strong> Fungsi linear <code>(f &#8728; g)(x)</code> koefisien dasar.<br>
+                                    • <strong>Resource:</strong> Salah -10 Nyawa &bull; Hint -10 Poin Hint.
                                 </p>
                             </div>
 
@@ -1793,7 +1882,8 @@
                                 </div>
                                 <p class="mode-card-desc">
                                     • <strong>Sandi Caesar:</strong> Kata 6–8 huruf, geseran kunci 4–13 posisi.<br>
-                                    • <strong>Komposisi Fungsi:</strong> Kombinasi kuadrat/linear &amp; urutan acak <code>(f &#8728; g)(x)</code> atau <code>(g &#8728; f)(x)</code>!
+                                    • <strong>Komposisi Fungsi:</strong> Dua fungsi linear <code>f(x) = ax + b</code> &amp; <code>g(x) = cx + d</code> dengan konstanta positif/negatif &amp; urutan acak <code>(f &#8728; g)(x)</code> atau <code>(g &#8728; f)(x)</code>!<br>
+                                    • <strong>Resource:</strong> Salah -20 Nyawa &bull; Hint -20 Poin Hint.
                                 </p>
                             </div>
                         </div>
@@ -1802,9 +1892,6 @@
                     <div class="btn-group">
                         <button class="btn btn-gold" id="btnStartGame">
                             &#9654; PLAY INVESTIGATION
-                        </button>
-                        <button class="btn btn-wood" id="btnRerollTitle" title="Buat varian soal acak baru">
-                            &#127922; ACAK KASUS BARU
                         </button>
                         <button class="btn btn-navy" id="btnOpenHowToPlay">
                             &#128214; HOW TO PLAY
@@ -1888,9 +1975,6 @@
                             </p>
                         </div>
                         <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                            <button class="btn-reroll-inline" id="btnRerollScreen3" title="Ganti dengan soal acak baru">
-                                &#127922; Acak Soal Baru
-                            </button>
                             <div style="font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700; background: var(--cream-dark); padding: 0.35rem 0.75rem; border-radius: 6px;">
                                 Percobaan: <span id="cipherAttemptsCount">0</span>
                             </div>
@@ -1928,7 +2012,7 @@
                             &#128275; DECRYPT
                         </button>
                         <button class="btn btn-wood" id="btnCipherHint">
-                            &#128161; HINT (-10 Poin)
+                            &#128161; HINT (-10 Poin Hint)
                         </button>
                     </div>
 
@@ -1969,9 +2053,6 @@
                             </p>
                         </div>
                         <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                            <button class="btn-reroll-inline" id="btnRerollScreen4" title="Ganti dengan soal acak baru">
-                                &#127922; Acak Soal Baru
-                            </button>
                             <div style="font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700; background: var(--cream-dark); padding: 0.35rem 0.75rem; border-radius: 6px;">
                                 Percobaan: <span id="machineAttemptsCount">0</span>
                             </div>
@@ -2053,7 +2134,7 @@
                             &#9881; CALCULATE
                         </button>
                         <button class="btn btn-wood" id="btnMachineHint">
-                            &#128161; SHOW HINT (-10 Poin)
+                            &#128161; SHOW HINT (-10 Poin Hint)
                         </button>
                     </div>
 
@@ -2206,7 +2287,7 @@
                             &#128218; REVIEW SOLUTIONS (PEMBAHASAN SOAL INI)
                         </button>
                         <button class="btn btn-gold" id="btnPlayAgain">
-                            &#128260; PLAY AGAIN (SOAL ACAK BARU)
+                            &#128260; MAIN LAGI
                         </button>
                     </div>
                 </div>
@@ -2224,25 +2305,34 @@
             <h3 class="modal-title" id="titleHowToPlay">&#128269; Cara Bermain — The Secret Envelope</h3>
 
             <div class="solution-block">
-                <h4>1. Misi Detektif &amp; Varian Soal Acak</h4>
+                <h4>1. Misi Detektif &amp; Kasus Otomatis</h4>
                 <p style="font-size: 0.92rem; line-height: 1.55;">
-                    Sebuah artefak berharga telah hilang! Setiap kali halaman dimuat ulang (<em>reload</em>) atau kamu menekan tombol <strong>&#127922; Soal Baru</strong>, sistem akan membuat kasus baru secara acak sehingga setiap pemain mendapatkan tantangan yang unik.
+                    Sebuah artefak berharga telah hilang! Setiap kali permainan dibuka pada tab baru, halaman dimuat ulang (<em>reload</em>), atau memulai investigasi baru, sistem secara otomatis menghasilkan berkas kasus unik dengan kombinasi sandi dan fungsi linear yang berbeda.
                 </p>
             </div>
 
             <div class="solution-block">
-                <h4>2. Dua Mode Kesulitan (EASY &amp; HARD)</h4>
+                <h4>2. Sistem Resource (Nyawa, Hint Points &amp; Skor)</h4>
                 <ul style="padding-left: 1.2rem; font-size: 0.92rem; line-height: 1.6;">
-                    <li><strong>MODE EASY (Detektif Muda):</strong> Kata sandi 4–5 huruf dengan pergeseran 1–5 langkah, serta komposisi fungsi linear <code>(f &#8728; g)(x) = f(g(x))</code>.</li>
-                    <li><strong>MODE HARD (Master Detektif):</strong> Kata sandi 6–8 huruf dengan pergeseran 4–13 langkah, melibatkan fungsi kuadrat &amp; linear dengan urutan komposisi acak <code>(f &#8728; g)(x)</code> atau <code>(g &#8728; f)(x)</code>!</li>
+                    <li><strong>&#10084;&#65039; NYAWA (100 Poin):</strong> Berkurang saat mengirim jawaban salah pada Dekripsi Caesar, Mesin Fungsi, atau Keypad Brankas (<strong>EASY: -10</strong>, <strong>HARD: -20</strong>). Jika Nyawa mencapai 0, investigasi gagal!</li>
+                    <li><strong>&#128161; HINT POINTS (100 Poin):</strong> Digunakan khusus untuk membuka petunjuk baru (<strong>EASY: -10</strong>, <strong>HARD: -20</strong>). Membuka petunjuk tidak mengurangi Nyawa maupun Skor utama.</li>
+                    <li><strong>&#9733; SKOR:</strong> Nilai prestasi investigasi yang bertambah saat kamu berhasil memecahkan teka-teki.</li>
                 </ul>
             </div>
 
             <div class="solution-block">
-                <h4>3. Materi Matematika dalam Investigasi</h4>
+                <h4>3. Dua Mode Kesulitan (EASY &amp; HARD)</h4>
+                <ul style="padding-left: 1.2rem; font-size: 0.92rem; line-height: 1.6;">
+                    <li><strong>MODE EASY (Detektif Muda):</strong> Kata sandi 4–5 huruf dengan pergeseran 1–5 langkah, serta komposisi dua fungsi linear <code>(f &#8728; g)(x) = f(g(x))</code> dengan koefisien ramah pemula.</li>
+                    <li><strong>MODE HARD (Master Detektif):</strong> Kata sandi 6–8 huruf dengan pergeseran 4–13 langkah, serta komposisi dua fungsi linear <code>f(x) = ax + b</code> dan <code>g(x) = cx + d</code> dengan koefisien lebih menantang, konstanta positif/negatif, dan urutan acak <code>(f &#8728; g)(x)</code> atau <code>(g &#8728; f)(x)</code>!</li>
+                </ul>
+            </div>
+
+            <div class="solution-block">
+                <h4>4. Materi Matematika dalam Investigasi</h4>
                 <ul style="padding-left: 1.2rem; font-size: 0.92rem; line-height: 1.6;">
                     <li><strong>Sandi Caesar (Caesar Cipher):</strong> Menggeser setiap huruf pada alfabet A–Z sejauh kunci <em>k</em>. Untuk mendekripsi, geser huruf mundur sebanyak <em>k</em> posisi.</li>
-                    <li><strong>Komposisi Fungsi:</strong> Kerjakan fungsi yang berada di bagian <strong>dalam kurung</strong> terlebih dahulu, lalu substitusikan hasilnya ke fungsi <strong>luar</strong>.</li>
+                    <li><strong>Komposisi Fungsi Linear:</strong> Kerjakan fungsi yang berada di bagian <strong>dalam kurung</strong> terlebih dahulu, lalu substitusikan hasilnya ke fungsi <strong>luar</strong>.</li>
                 </ul>
             </div>
 
@@ -2285,30 +2375,345 @@
     </div>
 
     <!-- ==========================================================================
-         JAVASCRIPT GAME ENGINE, RANDOM CASE GENERATOR & EDUCATIONAL LOGIC
+         MODAL 4: CASE FAILED / INVESTIGATION FAILED (GAME OVER)
+         ========================================================================== -->
+    <div class="modal-backdrop" id="modalCaseFailed" role="dialog" aria-modal="true" aria-labelledby="titleCaseFailed">
+        <div class="modal-dialog" style="max-width: 560px; border-color: var(--red-main);">
+            <h3 class="modal-title" id="titleCaseFailed" style="color: var(--red-main); border-bottom-color: var(--red-main);">
+                &#128680; INVESTIGATION FAILED — NYAWA HABIS
+            </h3>
+            <div class="solution-block" style="border-color: var(--red-main); background: rgba(201, 42, 42, 0.08);">
+                <p style="font-size: 0.96rem; line-height: 1.6; color: var(--ink-dark);" id="caseFailedMessage">
+                    Poin Nyawa kamu telah mencapai <strong>0/100</strong>. Terlalu banyak kesalahan analisis memicu sistem keamanan artefak dan mengunci seluruh petunjuk pada kasus ini.
+                </p>
+                <div class="math-step-code" id="caseFailedSummaryBox" style="margin-top: 0.75rem;">
+                    STATUS: CASE FAILED
+                </div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-navy" id="btnFailedBackLobby">
+                    &#127968; KEMBALI KE LOBBY
+                </button>
+                <button class="btn btn-gold" id="btnFailedRetryCase">
+                    &#128260; MULAI INVESTIGASI BARU
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         JAVASCRIPT GAME ENGINE, ADAPTIVE AUDIO, RESOURCE SYSTEM & LINEAR GENERATOR
          ========================================================================== -->
     <script>
         /**
          * ========================================================================
-         * 1. SOUND SYNTHESIZER (Web Audio API - Works 100% Without External Files)
+         * 1. SOUND ENGINE & PROCEDURAL ADAPTIVE BGM (Web Audio API)
          * ========================================================================
+         * Menangani efek suara (SFX) serta Background Music (BGM) ambient kontinu
+         * yang beradaptasi secara halus berdasarkan:
+         * - Layar aktif (Lobby vs Investigasi)
+         * - Mode kesulitan (EASY vs HARD)
+         * - Kondisi resource rendah (NYAWA <= 30 atau HINT POINTS <= 30)
          */
         const SoundEngine = {
             ctx: null,
             enabled: true,
+            bgmInitialized: false,
+            bgmProfile: 'none',
+            bgmMasterGain: null,
+            bgmFilter: null,
+            droneOsc1: null,
+            droneOsc2: null,
+            droneGain: null,
+            lfoOsc: null,
+            lfoGain: null,
+            pulseTimer: null,
+            stepCounter: 0,
+            pageHidden: false,
 
             init() {
                 if (!this.ctx && (window.AudioContext || window.webkitAudioContext)) {
                     const AudioCtx = window.AudioContext || window.webkitAudioContext;
                     this.ctx = new AudioCtx();
                 }
-                if (this.ctx && this.ctx.state === 'suspended') {
-                    this.ctx.resume();
+                if (this.ctx && this.ctx.state === 'suspended' && this.enabled && !this.pageHidden) {
+                    this.ctx.resume().catch(() => {});
                 }
             },
 
+            /**
+             * Membangun node BGM kontinu satu kali saja agar tidak pernah menumpuk oscillator
+             */
+            ensureBgmNodes() {
+                this.init();
+                if (!this.ctx || this.bgmInitialized) return;
+
+                try {
+                    const now = this.ctx.currentTime;
+
+                    this.bgmMasterGain = this.ctx.createGain();
+                    this.bgmMasterGain.gain.setValueAtTime(0.0001, now);
+
+                    this.bgmFilter = this.ctx.createBiquadFilter();
+                    this.bgmFilter.type = 'lowpass';
+                    this.bgmFilter.frequency.setValueAtTime(420, now);
+                    this.bgmFilter.Q.setValueAtTime(1.2, now);
+
+                    this.droneGain = this.ctx.createGain();
+                    this.droneGain.gain.setValueAtTime(0.06, now);
+
+                    this.droneOsc1 = this.ctx.createOscillator();
+                    this.droneOsc2 = this.ctx.createOscillator();
+                    this.droneOsc1.type = 'sine';
+                    this.droneOsc2.type = 'triangle';
+                    this.droneOsc1.frequency.setValueAtTime(110, now); // A2
+                    this.droneOsc2.frequency.setValueAtTime(164.81, now); // E3
+
+                    // LFO halus untuk menggerakkan filter cutoff secara natural
+                    this.lfoOsc = this.ctx.createOscillator();
+                    this.lfoGain = this.ctx.createGain();
+                    this.lfoOsc.type = 'sine';
+                    this.lfoOsc.frequency.setValueAtTime(0.18, now);
+                    this.lfoGain.gain.setValueAtTime(65, now);
+
+                    this.lfoOsc.connect(this.lfoGain);
+                    this.lfoGain.connect(this.bgmFilter.frequency);
+
+                    this.droneOsc1.connect(this.droneGain);
+                    this.droneOsc2.connect(this.droneGain);
+                    this.droneGain.connect(this.bgmFilter);
+                    this.bgmFilter.connect(this.bgmMasterGain);
+                    this.bgmMasterGain.connect(this.ctx.destination);
+
+                    this.droneOsc1.start(now);
+                    this.droneOsc2.start(now);
+                    this.lfoOsc.start(now);
+
+                    this.bgmInitialized = true;
+                } catch (e) {
+                    // Fallback aman jika Web Audio API dibatasi browser
+                }
+            },
+
+            /**
+             * Menentukan profil musik berdasarkan state permainan saat ini
+             */
+            resolveTargetProfile() {
+                if (!this.enabled || this.pageHidden) return 'muted';
+                if (!gameState || !gameState.currentScreen) return 'lobby';
+
+                // Di Lobby (Screen 1) atau Case Closed (Screen 6), gunakan atmosfer tenang
+                if (gameState.currentScreen === 1 || gameState.currentScreen === 6) {
+                    return 'lobby';
+                }
+
+                if (gameState.gameOver) {
+                    return 'gameover';
+                }
+
+                const lowLife = gameState.lifePoints <= 30;
+                const lowHint = gameState.hintPoints <= 30;
+                const isLowResource = lowLife || lowHint;
+
+                if (gameState.difficulty === 'HARD') {
+                    return isLowResource ? 'hard_low' : 'hard_normal';
+                }
+                return isLowResource ? 'easy_low' : 'easy_normal';
+            },
+
+            /**
+             * Memperbarui BGM secara adaptif dengan transisi frekuensi & gain yang halus
+             */
+            updateAdaptiveMusic() {
+                const targetProfile = this.resolveTargetProfile();
+
+                if (!this.enabled || this.pageHidden) {
+                    this.stopPulseLoop();
+                    if (this.bgmInitialized && this.ctx && this.bgmMasterGain) {
+                        const now = this.ctx.currentTime;
+                        this.bgmMasterGain.gain.setTargetAtTime(0.0001, now, 0.25);
+                    }
+                    this.bgmProfile = 'muted';
+                    return;
+                }
+
+                if (!this.ctx) return;
+                this.ensureBgmNodes();
+                if (!this.bgmInitialized) return;
+
+                const now = this.ctx.currentTime;
+                const bothCritical = gameState && gameState.lifePoints <= 30 && gameState.hintPoints <= 30;
+
+                // Konfigurasi parameter tiap profil musik
+                const profileConfigs = {
+                    lobby: {
+                        masterGain: 0.12,
+                        drone1: 110.0,    // A2 hangat
+                        drone2: 164.81,   // E3
+                        droneType2: 'sine',
+                        filterFreq: 380,
+                        filterQ: 1.0,
+                        lfoRate: 0.14,
+                        intervalMs: 1800,
+                        notes: [220.0, 261.63, 329.63, 392.0, 329.63, 261.63], // Am7 calm noir pad
+                        noteDur: 1.35,
+                        noteVol: 0.04,
+                        noteWave: 'sine',
+                        pulseVol: 0
+                    },
+                    easy_normal: {
+                        masterGain: 0.14,
+                        drone1: 110.0,    // A2
+                        drone2: 146.83,   // D3 (ringan & penuh teka-teki)
+                        droneType2: 'triangle',
+                        filterFreq: 480,
+                        filterQ: 1.4,
+                        lfoRate: 0.22,
+                        intervalMs: 1100,
+                        notes: [220.0, 246.94, 261.63, 329.63, 293.66, 261.63],
+                        noteDur: 0.75,
+                        noteVol: 0.045,
+                        noteWave: 'triangle',
+                        pulseVol: 0.025
+                    },
+                    easy_low: {
+                        masterGain: bothCritical ? 0.18 : 0.16,
+                        drone1: 116.54,   // Bb2 (lebih mendesak)
+                        drone2: 174.61,   // F3
+                        droneType2: 'triangle',
+                        filterFreq: bothCritical ? 680 : 600,
+                        filterQ: 2.2,
+                        lfoRate: 0.55,
+                        intervalMs: bothCritical ? 520 : 620,
+                        notes: [233.08, 277.18, 349.23, 311.13, 277.18, 349.23],
+                        noteDur: 0.38,
+                        noteVol: 0.055,
+                        noteWave: 'triangle',
+                        pulseVol: bothCritical ? 0.055 : 0.042
+                    },
+                    hard_normal: {
+                        masterGain: 0.16,
+                        drone1: 73.42,    // D2 drone rendah gelap
+                        drone2: 110.0,    // A2
+                        droneType2: 'sawtooth',
+                        filterFreq: 340,
+                        filterQ: 2.4,
+                        lfoRate: 0.28,
+                        intervalMs: 880,
+                        notes: [146.83, 174.61, 220.0, 207.65, 174.61, 164.81], // Harmoni minor + tritone halus
+                        noteDur: 0.62,
+                        noteVol: 0.048,
+                        noteWave: 'triangle',
+                        pulseVol: 0.04
+                    },
+                    hard_low: {
+                        masterGain: bothCritical ? 0.21 : 0.19,
+                        drone1: 69.30,    // C#2 gelap & menekan
+                        drone2: 98.0,     // G2 interval diminished/tritone
+                        droneType2: 'sawtooth',
+                        filterFreq: bothCritical ? 760 : 640,
+                        filterQ: 3.4,
+                        lfoRate: 0.85,
+                        intervalMs: bothCritical ? 380 : 450,
+                        notes: [138.59, 164.81, 196.0, 207.65, 196.0, 155.56],
+                        noteDur: 0.28,
+                        noteVol: 0.062,
+                        noteWave: 'sawtooth',
+                        pulseVol: bothCritical ? 0.075 : 0.06
+                    },
+                    gameover: {
+                        masterGain: 0.09,
+                        drone1: 65.41,    // C2
+                        drone2: 77.78,    // Eb2
+                        droneType2: 'sine',
+                        filterFreq: 220,
+                        filterQ: 1.0,
+                        lfoRate: 0.1,
+                        intervalMs: 2400,
+                        notes: [130.81, 155.56, 130.81],
+                        noteDur: 1.5,
+                        noteVol: 0.03,
+                        noteWave: 'sine',
+                        pulseVol: 0
+                    }
+                };
+
+                const cfg = profileConfigs[targetProfile] || profileConfigs.lobby;
+
+                try {
+                    this.droneOsc2.type = cfg.droneType2;
+                    this.droneOsc1.frequency.setTargetAtTime(cfg.drone1, now, 0.45);
+                    this.droneOsc2.frequency.setTargetAtTime(cfg.drone2, now, 0.45);
+                    this.bgmFilter.frequency.setTargetAtTime(cfg.filterFreq, now, 0.45);
+                    this.bgmFilter.Q.setTargetAtTime(cfg.filterQ, now, 0.45);
+                    this.lfoOsc.frequency.setTargetAtTime(cfg.lfoRate, now, 0.45);
+                    this.bgmMasterGain.gain.setTargetAtTime(cfg.masterGain, now, 0.35);
+                } catch (e) {}
+
+                if (this.bgmProfile !== targetProfile || !this.pulseTimer) {
+                    this.bgmProfile = targetProfile;
+                    this.startPulseLoop(cfg);
+                }
+            },
+
+            stopPulseLoop() {
+                if (this.pulseTimer) {
+                    clearInterval(this.pulseTimer);
+                    this.pulseTimer = null;
+                }
+            },
+
+            startPulseLoop(cfg) {
+                this.stopPulseLoop();
+                if (!this.enabled || this.pageHidden) return;
+
+                const triggerStep = () => {
+                    if (!this.enabled || this.pageHidden || !this.ctx || this.ctx.state !== 'running') return;
+                    try {
+                        const now = this.ctx.currentTime;
+                        const noteFreq = cfg.notes[this.stepCounter % cfg.notes.length];
+
+                        // Lapisan melodi misteri lembut
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = cfg.noteWave;
+                        osc.frequency.setValueAtTime(noteFreq, now);
+
+                        gain.gain.setValueAtTime(0.0001, now);
+                        gain.gain.linearRampToValueAtTime(cfg.noteVol, now + 0.06);
+                        gain.gain.exponentialRampToValueAtTime(0.0001, now + cfg.noteDur);
+
+                        osc.connect(this.bgmFilter);
+                        osc.start(now);
+                        osc.stop(now + cfg.noteDur + 0.02);
+
+                        // Lapisan denyut ritmis (detak investigasi / urgensi)
+                        if (cfg.pulseVol > 0) {
+                            const pulseOsc = this.ctx.createOscillator();
+                            const pulseGain = this.ctx.createGain();
+                            pulseOsc.type = 'sine';
+                            const basePulse = (this.stepCounter % 2 === 0) ? cfg.drone1 * 1.5 : cfg.drone1;
+                            pulseOsc.frequency.setValueAtTime(basePulse, now);
+                            pulseOsc.frequency.exponentialRampToValueAtTime(42, now + 0.14);
+
+                            pulseGain.gain.setValueAtTime(cfg.pulseVol, now);
+                            pulseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
+
+                            pulseOsc.connect(this.bgmMasterGain);
+                            pulseOsc.start(now);
+                            pulseOsc.stop(now + 0.16);
+                        }
+
+                        this.stepCounter++;
+                    } catch (e) {}
+                };
+
+                triggerStep();
+                this.pulseTimer = setInterval(triggerStep, cfg.intervalMs);
+            },
+
             playTone(freq, type = 'sine', duration = 0.12, volume = 0.12, delay = 0) {
-                if (!this.enabled) return;
+                if (!this.enabled || this.pageHidden) return;
                 try {
                     this.init();
                     if (!this.ctx) return;
@@ -2327,9 +2732,7 @@
 
                     osc.start(startTime);
                     osc.stop(startTime + duration);
-                } catch (e) {
-                    // Fail silently if browser blocks audio
-                }
+                } catch (e) {}
             },
 
             click() {
@@ -2354,6 +2757,12 @@
                 this.playTone(165, 'sawtooth', 0.24, 0.11, 0.14);
             },
 
+            gameOverSound() {
+                this.playTone(196.0, 'sawtooth', 0.22, 0.14, 0);
+                this.playTone(174.61, 'sawtooth', 0.22, 0.14, 0.2);
+                this.playTone(146.83, 'sawtooth', 0.45, 0.16, 0.4);
+            },
+
             keypadBeep() {
                 this.playTone(880, 'sine', 0.07, 0.09);
             }
@@ -2361,13 +2770,12 @@
 
         /**
          * ========================================================================
-         * 2. MATHEMATICAL & CRYPTOGRAPHY MODULES (Genuine Implementations)
+         * 2. MATHEMATICAL & CRYPTOGRAPHY MODULES (Genuine Linear Implementations)
          * ========================================================================
          */
 
         /**
          * Enkripsi Sandi Caesar (A-Z)
-         * Menggeser setiap huruf maju sebesar `shift` posisi dengan modulo 26.
          */
         function caesarEncrypt(plainText, shift) {
             const normalizedShift = ((shift % 26) + 26) % 26;
@@ -2387,7 +2795,6 @@
 
         /**
          * Dekripsi Sandi Caesar (A-Z)
-         * Menggeser setiap huruf mundur sebesar `shift` posisi ke arah sebaliknya.
          */
         function caesarDecrypt(cipherText, shift) {
             const normalizedShift = ((shift % 26) + 26) % 26;
@@ -2406,29 +2813,26 @@
         }
 
         /**
-         * Evaluasi spesifikasi fungsi polinomial (linear / kuadrat)
-         * Spec: { type: 'linear' | 'quadratic', a, b }
-         * - linear: a*x + b
-         * - quadratic: a*(x^2) + b
+         * Evaluasi fungsi linear f(x) = a*x + b
+         * Spec: { type: 'linear', a, b }
          */
         function evalFunctionSpec(spec, x) {
             const numX = Number(x);
-            if (spec.type === 'quadratic') {
-                return spec.a * (numX * numX) + spec.b;
-            }
-            return spec.a * numX + spec.b;
+            return Number(spec.a) * numX + Number(spec.b);
         }
 
         /**
-         * Format rumus fungsi menjadi string matematika yang rapi
-         * Contoh: "x + 3", "2x - 1", "x² + 4"
+         * Format rumus fungsi linear menjadi string matematika yang rapi
+         * Contoh: "x + 3", "3x - 5", "4x + 7"
          */
         function formatFunctionFormula(funcName, spec) {
             let expr = '';
-            if (spec.type === 'quadratic') {
-                expr = spec.a === 1 ? 'x²' : `${spec.a}x²`;
+            if (spec.a === 1) {
+                expr = 'x';
+            } else if (spec.a === -1) {
+                expr = '-x';
             } else {
-                expr = spec.a === 1 ? 'x' : `${spec.a}x`;
+                expr = `${spec.a}x`;
             }
 
             if (spec.b > 0) {
@@ -2440,44 +2844,32 @@
         }
 
         /**
-         * Format langkah substitusi fungsi untuk penjelasan dan hint
+         * Format langkah substitusi fungsi linear untuk penjelasan dan hint
          */
         function formatStepSubstitution(funcName, spec, inputVal, resultVal) {
-            if (spec.type === 'quadratic') {
-                const sq = inputVal * inputVal;
-                const aPart = spec.a === 1 ? `${inputVal}²` : `${spec.a} × ${inputVal}²`;
+            if (spec.a === 1) {
                 if (spec.b === 0) {
-                    return `${funcName}(${inputVal}) = ${aPart} = ${resultVal}`;
+                    return `${funcName}(${inputVal}) = ${inputVal}`;
                 }
                 const sign = spec.b > 0 ? '+' : '-';
-                const absB = Math.abs(spec.b);
-                const prod = spec.a * sq;
-                return `${funcName}(${inputVal}) = ${aPart} ${sign} ${absB} = ${prod} ${sign} ${absB} = ${resultVal}`;
-            } else {
-                if (spec.a === 1) {
-                    const sign = spec.b >= 0 ? '+' : '-';
-                    return `${funcName}(${inputVal}) = ${inputVal} ${sign} ${Math.abs(spec.b)} = ${resultVal}`;
-                }
-                if (spec.b === 0) {
-                    return `${funcName}(${inputVal}) = ${spec.a} × ${inputVal} = ${resultVal}`;
-                }
-                const prod = spec.a * inputVal;
-                const sign = spec.b > 0 ? '+' : '-';
-                const absB = Math.abs(spec.b);
-                return `${funcName}(${inputVal}) = (${spec.a} × ${inputVal}) ${sign} ${absB} = ${prod} ${sign} ${absB} = ${resultVal}`;
+                return `${funcName}(${inputVal}) = ${inputVal} ${sign} ${Math.abs(spec.b)} = ${resultVal}`;
             }
+            if (spec.b === 0) {
+                return `${funcName}(${inputVal}) = ${spec.a} × ${inputVal} = ${resultVal}`;
+            }
+            const prod = spec.a * inputVal;
+            const sign = spec.b > 0 ? '+' : '-';
+            const absB = Math.abs(spec.b);
+            return `${funcName}(${inputVal}) = (${spec.a} × ${inputVal}) ${sign} ${absB} = ${prod} ${sign} ${absB} = ${resultVal}`;
         }
 
         /**
-         * Fungsi Matematika f(x) berdasarkan konfigurasi kasus aktif
+         * Fungsi Matematika f(x) dan g(x) berdasarkan konfigurasi kasus aktif
          */
         function functionF(x) {
             return evalFunctionSpec(gameState.fSpec, x);
         }
 
-        /**
-         * Fungsi Matematika g(x) berdasarkan konfigurasi kasus aktif
-         */
         function functionG(x) {
             return evalFunctionSpec(gameState.gSpec, x);
         }
@@ -2497,24 +2889,29 @@
 
         /**
          * ========================================================================
-         * 3. DYNAMIC CASE GENERATOR (EASY & HARD POOLS + ANTI-REPEAT ON RELOAD)
+         * 3. AUTOMATIC CASE GENERATOR (LINEAR FUNCTIONS & CROSS-TAB ANTI-REPEAT)
          * ========================================================================
          */
-        const LAST_SIGNATURE_KEY = 'SECRET_ENVELOPE_LAST_CASE_SIG';
-        const LAST_DIFFICULTY_KEY = 'SECRET_ENVELOPE_LAST_DIFFICULTY';
+        const CASE_HISTORY_STORAGE_KEY = 'SECRET_ENVELOPE_CASE_HISTORY_V2';
+        const LAST_DIFFICULTY_KEY = 'SECRET_ENVELOPE_PREFERRED_DIFFICULTY';
+        const MAX_HISTORY_LENGTH = 50;
+        let memoryCaseHistory = [];
 
         const WORD_POOLS = {
             EASY: [
                 'HELLO', 'CLUE', 'SAFE', 'GOLD', 'CODE',
                 'LOCK', 'LAMP', 'RING', 'MASK', 'BOOK',
                 'NOTE', 'TIME', 'KEYS', 'FIND', 'DESK',
-                'FILE', 'SEAL', 'COIN', 'MAPS', 'DOOR'
+                'FILE', 'SEAL', 'COIN', 'MAPS', 'DOOR',
+                'DIAL', 'CARD', 'WARD', 'lens'.toUpperCase()
             ],
             HARD: [
                 'MYSTERY', 'CIPHER', 'ARTIFACT', 'ENIGMA',
                 'SECRETS', 'SHADOWS', 'EVIDENCE', 'TREASURE',
                 'PHANTOM', 'ARCHIVE', 'VINTAGE', 'LANTERN',
-                'COMPASS', 'JOURNAL', 'WITNESS', 'KEYHOLE'
+                'COMPASS', 'JOURNAL', 'WITNESS', 'KEYHOLE',
+                'SUSPECT', 'VERDICT', 'CABINET', 'CHAMBER',
+                'DETECT', 'DECRYPT', 'PADLOCK', 'DOSSIER'
             ]
         };
 
@@ -2526,88 +2923,120 @@
             return arr[Math.floor(Math.random() * arr.length)];
         }
 
+        function getRecentCaseHistory() {
+            try {
+                const raw = localStorage.getItem(CASE_HISTORY_STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) {
+                        return parsed;
+                    }
+                }
+            } catch (e) {}
+            return memoryCaseHistory;
+        }
+
+        function recordCaseSignature(signature) {
+            const history = getRecentCaseHistory();
+            const updated = [signature, ...history.filter(item => item !== signature)].slice(0, MAX_HISTORY_LENGTH);
+            memoryCaseHistory = updated;
+            try {
+                localStorage.setItem(CASE_HISTORY_STORAGE_KEY, JSON.stringify(updated));
+            } catch (e) {}
+        }
+
         /**
          * Menghasilkan paket soal acak baru berdasarkan tingkat kesulitan ('EASY' atau 'HARD').
-         * Menjamin soal selalu berbeda dari sesi/reload sebelumnya.
+         * Seluruh fungsi f(x) dan g(x) pada EASY maupun HARD dijamin bertipe LINEAR:
+         * f(x) = ax + b dan g(x) = cx + d.
          */
         function generateRandomCaseConfig(difficulty = 'EASY') {
-            const lastSig = sessionStorage.getItem(LAST_SIGNATURE_KEY) || '';
+            const recentSignatures = getRecentCaseHistory();
             let candidate = null;
             let attempts = 0;
 
-            while (attempts < 40) {
+            while (attempts < 80) {
                 attempts++;
                 const plainWord = randomChoice(WORD_POOLS[difficulty]);
                 const shift = difficulty === 'EASY' ? randomInt(1, 5) : randomInt(4, 13);
                 const cipherText = caesarEncrypt(plainWord, shift);
-                const targetX = difficulty === 'EASY' ? randomInt(2, 8) : randomInt(3, 9);
+                const targetX = difficulty === 'EASY' ? randomInt(2, 8) : randomInt(3, 11);
 
                 let fSpec, gSpec, compositionOrder;
 
                 if (difficulty === 'EASY') {
                     compositionOrder = 'fog'; // (f o g)(x) = f(g(x))
                     const easyTemplates = [
-                        // Tipe 1: f(x) = x + b, g(x) = a*x
                         () => ({
                             f: { type: 'linear', a: 1, b: randomInt(2, 9) },
                             g: { type: 'linear', a: randomInt(2, 4), b: 0 }
                         }),
-                        // Tipe 2: f(x) = a*x + b, g(x) = x + d
                         () => ({
                             f: { type: 'linear', a: randomInt(2, 3), b: randomInt(1, 6) },
                             g: { type: 'linear', a: 1, b: randomInt(2, 6) }
                         }),
-                        // Tipe 3: f(x) = a*x - b, g(x) = c*x
                         () => ({
-                            f: { type: 'linear', a: randomInt(2, 3), b: -randomInt(1, 5) },
+                            f: { type: 'linear', a: randomInt(2, 3), b: -randomInt(1, 4) },
                             g: { type: 'linear', a: randomInt(2, 3), b: 0 }
                         }),
-                        // Tipe 4: f(x) = x + b, g(x) = c*x + d
                         () => ({
                             f: { type: 'linear', a: 1, b: randomInt(3, 8) },
-                            g: { type: 'linear', a: randomInt(2, 3), b: randomInt(1, 4) }
+                            g: { type: 'linear', a: randomInt(2, 3), b: randomInt(1, 5) }
                         })
                     ];
                     const chosen = randomChoice(easyTemplates)();
                     fSpec = chosen.f;
                     gSpec = chosen.g;
                 } else {
-                    // HARD Mode: Quadratic + Multi-term Linear & Acak urutan (f o g) atau (g o f)
+                    // HARD Mode: Semua fungsi WAJIB LINEAR f(x) = ax + b dan g(x) = cx + d
+                    // Dengan koefisien bervariasi, konstanta positif/negatif, serta urutan (f o g) atau (g o f)
                     compositionOrder = Math.random() < 0.5 ? 'fog' : 'gof';
-                    const hardTemplates = [
-                        // Tipe 1: f(x) = x² + b, g(x) = a*x - d
+                    const hardLinearTemplates = [
+                        // Tipe 1: f(x) = ax + b (positif), g(x) = cx - d (negatif)
                         () => ({
-                            f: { type: 'quadratic', a: 1, b: randomInt(2, 9) },
-                            g: { type: 'linear', a: randomInt(2, 3), b: -randomInt(1, 4) }
+                            f: { type: 'linear', a: randomInt(3, 6), b: randomInt(3, 11) },
+                            g: { type: 'linear', a: randomInt(2, 5), b: -randomInt(2, 7) }
                         }),
-                        // Tipe 2: f(x) = a*x + b, g(x) = x² + d
+                        // Tipe 2: f(x) = ax - b (negatif), g(x) = cx + d (positif)
                         () => ({
-                            f: { type: 'linear', a: randomInt(2, 4), b: -randomInt(2, 7) },
-                            g: { type: 'quadratic', a: 1, b: randomInt(1, 5) }
+                            f: { type: 'linear', a: randomInt(3, 6), b: -randomInt(3, 9) },
+                            g: { type: 'linear', a: randomInt(2, 5), b: randomInt(4, 10) }
                         }),
-                        // Tipe 3: f(x) = a*x - b, g(x) = c*x + d (Koefisien lebih menantang)
+                        // Tipe 3: f(x) = ax + b, g(x) = cx + d (keduanya konstanta positif besar)
                         () => ({
-                            f: { type: 'linear', a: randomInt(3, 5), b: -randomInt(3, 8) },
-                            g: { type: 'linear', a: randomInt(2, 4), b: randomInt(2, 7) }
+                            f: { type: 'linear', a: randomInt(2, 6), b: randomInt(4, 12) },
+                            g: { type: 'linear', a: randomInt(3, 6), b: randomInt(2, 9) }
                         }),
-                        // Tipe 4: f(x) = 2x² - b, g(x) = x + d
+                        // Tipe 4: f(x) = ax - b, g(x) = cx - d (keduanya konstanta negatif)
                         () => ({
-                            f: { type: 'quadratic', a: 2, b: -randomInt(3, 7) },
-                            g: { type: 'linear', a: 1, b: randomInt(2, 5) }
+                            f: { type: 'linear', a: randomInt(3, 6), b: -randomInt(2, 8) },
+                            g: { type: 'linear', a: randomInt(3, 5), b: -randomInt(2, 6) }
                         })
                     ];
-                    const chosen = randomChoice(hardTemplates)();
+                    const chosen = randomChoice(hardLinearTemplates)();
                     fSpec = chosen.f;
                     gSpec = chosen.g;
                 }
 
-                // Evaluasi untuk memastikan nilai positif (kode PIN brankas 1-4 digit) dan f(g(x)) != g(f(x))
-                const fogVal = evalFunctionSpec(fSpec, evalFunctionSpec(gSpec, targetX));
-                const gofVal = evalFunctionSpec(gSpec, evalFunctionSpec(fSpec, targetX));
-                const targetVal = compositionOrder === 'fog' ? fogVal : gofVal;
-                const sig = `${difficulty}-${plainWord}-${shift}-${targetX}-${fSpec.type}${fSpec.a}_${fSpec.b}-${gSpec.type}${gSpec.a}_${gSpec.b}-${compositionOrder}`;
+                // Evaluasi kedua urutan komposisi untuk validasi matematika
+                const gOfX = evalFunctionSpec(gSpec, targetX);
+                const fOfX = evalFunctionSpec(fSpec, targetX);
+                const fogVal = evalFunctionSpec(fSpec, gOfX);
+                const gofVal = evalFunctionSpec(gSpec, fOfX);
 
-                if (targetVal > 0 && targetVal <= 9999 && fogVal !== gofVal && sig !== lastSig) {
+                const targetVal = compositionOrder === 'fog' ? fogVal : gofVal;
+                const innerVal = compositionOrder === 'fog' ? gOfX : fOfX;
+
+                const sig = `${difficulty}|${plainWord}|${shift}|${targetX}|L_${fSpec.a}_${fSpec.b}|L_${gSpec.a}_${gSpec.b}|${compositionOrder}`;
+
+                // Pastikan nilai antara dan nilai akhir positif (1..9999), urutan komposisi menghasilkan angka berbeda, dan belum ada di riwayat
+                if (
+                    innerVal > 0 &&
+                    targetVal >= 1 &&
+                    targetVal <= 9999 &&
+                    fogVal !== gofVal &&
+                    !recentSignatures.includes(sig)
+                ) {
                     const caseNum = randomInt(100, 999);
                     const prefixLetter = String.fromCharCode(65 + randomInt(0, 25));
                     candidate = {
@@ -2619,31 +3048,39 @@
                         targetX,
                         fSpec,
                         gSpec,
-                        compositionOrder, // 'fog' atau 'gof'
+                        compositionOrder,
                         signature: sig
                     };
                     break;
                 }
             }
 
-            // Fallback aman jika loop tidak menemukan (sangat jarang)
+            // Fallback linear aman jika seluruh percobaan bertabrakan
             if (!candidate) {
+                const isHard = difficulty === 'HARD';
+                const fallbackWord = isHard ? 'MYSTERY' : 'HELLO';
+                const fallbackShift = isHard ? 5 : 3;
+                const fallbackX = isHard ? 6 : 4;
+                const fallbackF = isHard ? { type: 'linear', a: 3, b: 5 } : { type: 'linear', a: 1, b: 3 };
+                const fallbackG = isHard ? { type: 'linear', a: 2, b: -4 } : { type: 'linear', a: 2, b: 0 };
+                const fallbackOrder = 'fog';
+                const fallbackSig = `${difficulty}|${fallbackWord}|${fallbackShift}|${fallbackX}|L_${fallbackF.a}_${fallbackF.b}|L_${fallbackG.a}_${fallbackG.b}|${fallbackOrder}`;
                 candidate = {
                     caseId: `CASE #D404-${difficulty}`,
                     difficulty,
-                    plainWord: difficulty === 'EASY' ? 'HELLO' : 'MYSTERY',
-                    cipherText: caesarEncrypt(difficulty === 'EASY' ? 'HELLO' : 'MYSTERY', difficulty === 'EASY' ? 3 : 5),
-                    cipherShift: difficulty === 'EASY' ? 3 : 5,
-                    targetX: 4,
-                    fSpec: { type: 'linear', a: 1, b: 3 },
-                    gSpec: { type: 'linear', a: 2, b: 0 },
-                    compositionOrder: 'fog',
-                    signature: 'fallback'
+                    plainWord: fallbackWord,
+                    cipherText: caesarEncrypt(fallbackWord, fallbackShift),
+                    cipherShift: fallbackShift,
+                    targetX: fallbackX,
+                    fSpec: fallbackF,
+                    gSpec: fallbackG,
+                    compositionOrder: fallbackOrder,
+                    signature: fallbackSig
                 };
             }
 
+            recordCaseSignature(candidate.signature);
             try {
-                sessionStorage.setItem(LAST_SIGNATURE_KEY, candidate.signature);
                 sessionStorage.setItem(LAST_DIFFICULTY_KEY, difficulty);
             } catch (e) {}
 
@@ -2652,10 +3089,14 @@
 
         /**
          * ========================================================================
-         * 4. CENTRALIZED GAME STATE MANAGEMENT
+         * 4. CENTRALIZED GAME STATE & RESOURCE HELPERS (LIFE & HINT POINTS)
          * ========================================================================
          */
         let gameState = {};
+
+        function getPenaltyAmount(difficulty = gameState.difficulty) {
+            return difficulty === 'HARD' ? 20 : 10;
+        }
 
         function createNewGameState(difficulty = 'EASY', startAtScreen = 1) {
             const config = generateRandomCaseConfig(difficulty);
@@ -2665,6 +3106,9 @@
                 currentScreen: startAtScreen,
                 highestUnlockedScreen: startAtScreen,
                 score: 100,
+                lifePoints: 100,
+                hintPoints: 100,
+                gameOver: false,
                 envelopeOpened: startAtScreen > 2,
                 // Stage 3: Caesar Cipher State
                 plainWord: config.plainWord,
@@ -2672,24 +3116,117 @@
                 cipherShift: config.cipherShift,
                 cipherSolved: startAtScreen > 3,
                 cipherAttempts: 0,
-                cipherHintUsed: false,
+                cipherHintLevel: 0,
                 decryptedMessage: startAtScreen > 3 ? config.plainWord : '',
                 targetClueX: config.targetX,
                 initialClueX: startAtScreen > 3 ? config.targetX : null,
-                // Stage 4: Function Composition State
+                // Stage 4: Function Composition State (Linear Only)
                 fSpec: config.fSpec,
                 gSpec: config.gSpec,
                 compositionOrder: config.compositionOrder, // 'fog' | 'gof'
                 functionSolved: false,
                 functionAttempts: 0,
-                functionHintUsed: false,
+                functionHintLevel: 0,
                 intermediateValue: null,
                 accessCode: null,
                 // Stage 5: Locked Safe State
                 safeUnlocked: false,
                 safeAttempts: 0,
-                currentKeypadInput: ''
+                currentKeypadInput: '',
+                // Statistik Total Hint Valid yang Dibeli
+                totalHintsPurchased: 0
             };
+        }
+
+        /**
+         * Helper terpusat untuk mengurangi Poin Nyawa ketika jawaban salah
+         */
+        function deductLifePoints(stageDescription) {
+            if (gameState.gameOver) return 0;
+            const penalty = getPenaltyAmount(gameState.difficulty);
+            gameState.lifePoints = Math.max(0, Math.min(100, gameState.lifePoints - penalty));
+
+            if (gameState.lifePoints <= 0) {
+                gameState.lifePoints = 0;
+                gameState.gameOver = true;
+                SoundEngine.gameOverSound();
+                openCaseFailedModal(stageDescription);
+            }
+
+            SoundEngine.updateAdaptiveMusic();
+            return penalty;
+        }
+
+        /**
+         * Helper terpusat untuk menggunakan Hint Points secara adil
+         * - Hanya mengurangi poin jika membuka level petunjuk baru pada tahap tersebut.
+         * - Jika petunjuk tahap tersebut sudah terbuka semua, menampilkan ulang tanpa biaya.
+         * - Jika Hint Points tidak cukup, menolak membuka petunjuk baru.
+         */
+        function tryConsumeHintPoints(stageKey, maxLevel = 3) {
+            if (gameState.gameOver) {
+                return { status: 'gameover', cost: 0 };
+            }
+
+            const levelProp = stageKey === 'cipher' ? 'cipherHintLevel' : 'functionHintLevel';
+            const currentLevel = gameState[levelProp] || 0;
+            const cost = getPenaltyAmount(gameState.difficulty);
+
+            // Jika seluruh level petunjuk pada tahap ini sudah terbuka, jangan kurangi poin lagi
+            if (currentLevel >= maxLevel) {
+                return {
+                    status: 'already_unlocked',
+                    level: currentLevel,
+                    maxLevel,
+                    cost: 0
+                };
+            }
+
+            // Periksa kecukupan Hint Points sebelum membuka petunjuk baru
+            if (gameState.hintPoints < cost) {
+                return {
+                    status: 'insufficient',
+                    level: currentLevel,
+                    maxLevel,
+                    cost,
+                    remaining: gameState.hintPoints
+                };
+            }
+
+            gameState.hintPoints = Math.max(0, Math.min(100, gameState.hintPoints - cost));
+            gameState[levelProp] = currentLevel + 1;
+            gameState.totalHintsPurchased += 1;
+
+            SoundEngine.updateAdaptiveMusic();
+            return {
+                status: 'unlocked',
+                level: gameState[levelProp],
+                maxLevel,
+                cost,
+                remaining: gameState.hintPoints
+            };
+        }
+
+        function openCaseFailedModal(stageDescription) {
+            const modal = document.getElementById('modalCaseFailed');
+            const summaryBox = document.getElementById('caseFailedSummaryBox');
+            const msgEl = document.getElementById('caseFailedMessage');
+
+            msgEl.innerHTML =
+                `Poin Nyawa kamu telah mencapai <strong>0/100</strong> setelah kesalahan pada tahap <strong>${stageDescription}</strong>. ` +
+                `Sistem pengaman artefak telah mengunci seluruh akses pada berkas kasus ini.`;
+
+            summaryBox.innerHTML =
+                `BERKAS KASUS : ${gameState.caseId}<br>` +
+                `MODE         : ${gameState.difficulty}<br>` +
+                `TAHAP GAGAL  : ${stageDescription}<br>` +
+                `SKOR TERAKHIR: ${gameState.score} Poin`;
+
+            modal.classList.add('open');
+        }
+
+        function closeCaseFailedModal() {
+            document.getElementById('modalCaseFailed').classList.remove('open');
         }
 
         /**
@@ -2717,6 +3254,11 @@
          * ========================================================================
          */
         function navigateToScreen(targetScreen) {
+            if (gameState.gameOver && targetScreen !== 1) {
+                SoundEngine.error();
+                openCaseFailedModal('Investigasi Terkunci');
+                return;
+            }
             if (targetScreen > gameState.highestUnlockedScreen) {
                 SoundEngine.error();
                 return;
@@ -2732,6 +3274,7 @@
 
             gameState.currentScreen = targetScreen;
             renderAllUI();
+            SoundEngine.updateAdaptiveMusic();
         }
 
         function unlockNextStage(stageNumber) {
@@ -2747,31 +3290,68 @@
         }
 
         /**
-         * Mengubah tingkat kesulitan atau mengacak soal baru
+         * Memulai ulang investigasi dengan kasus acak baru
          */
-        function triggerNewRandomCase(newDifficulty = gameState.difficulty, keepCurrentScreen = false) {
-            SoundEngine.click();
-            let targetScreen = 1;
-            if (keepCurrentScreen && gameState.currentScreen >= 2 && gameState.currentScreen <= 4) {
-                targetScreen = gameState.currentScreen;
-            }
-            gameState = createNewGameState(newDifficulty, targetScreen);
+        function startFreshCase(newDifficulty = gameState.difficulty, startScreen = 1) {
+            closeCaseFailedModal();
+            gameState = createNewGameState(newDifficulty, startScreen);
 
-            // Bersihkan input dan kotak pesan
+            // Bersihkan seluruh input & banner feedback dari sesi sebelumnya
             document.getElementById('inputCipherAnswer').value = '';
             document.getElementById('inputMachineAnswer').value = '';
             document.getElementById('cipherFeedbackBox').className = 'feedback-banner';
             document.getElementById('cipherFeedbackBox').innerHTML = '';
             document.getElementById('cipherHintBox').style.display = 'none';
+            document.getElementById('cipherHintBox').innerHTML = '';
             document.getElementById('machineFeedbackBox').className = 'feedback-banner';
             document.getElementById('machineFeedbackBox').innerHTML = '';
             document.getElementById('machineHintBox').style.display = 'none';
+            document.getElementById('machineHintBox').innerHTML = '';
             document.getElementById('safeFeedbackBox').className = 'feedback-banner';
             document.getElementById('safeFeedbackBox').innerHTML = '';
             document.getElementById('alphaInspectorReadout').textContent = 'Klik huruf di bawah';
             document.querySelectorAll('.alpha-cell').forEach(c => c.classList.remove('selected-cipher', 'shifted-target'));
 
             renderAllUI();
+            SoundEngine.updateAdaptiveMusic();
+        }
+
+        function renderResourceMeters() {
+            // 1. Life Points HUD
+            const lifeVal = Math.max(0, Math.min(100, gameState.lifePoints));
+            const lifePill = document.getElementById('hudLifePill');
+            const lifeText = document.getElementById('hudLifeValue');
+            const lifeBar = document.getElementById('hudLifeBar');
+            const lifeProg = document.getElementById('hudLifeProgress');
+
+            lifeText.textContent = `${lifeVal}/100`;
+            lifeBar.style.width = `${lifeVal}%`;
+            lifeProg.setAttribute('aria-valuenow', String(lifeVal));
+
+            lifePill.classList.remove('warning-state', 'critical-state');
+            if (lifeVal <= 30) {
+                lifePill.classList.add('critical-state');
+            } else if (lifeVal <= 50) {
+                lifePill.classList.add('warning-state');
+            }
+
+            // 2. Hint Points HUD
+            const hintVal = Math.max(0, Math.min(100, gameState.hintPoints));
+            const hintPill = document.getElementById('hudHintPill');
+            const hintText = document.getElementById('hudHintValue');
+            const hintBar = document.getElementById('hudHintBar');
+            const hintProg = document.getElementById('hudHintProgress');
+
+            hintText.textContent = `${hintVal}/100`;
+            hintBar.style.width = `${hintVal}%`;
+            hintProg.setAttribute('aria-valuenow', String(hintVal));
+
+            hintPill.classList.remove('warning-state', 'critical-state');
+            if (hintVal <= 30) {
+                hintPill.classList.add('critical-state');
+            } else if (hintVal <= 50) {
+                hintPill.classList.add('warning-state');
+            }
         }
 
         function renderAllUI() {
@@ -2783,10 +3363,11 @@
                 }
             }
 
-            // 2. Update HUD Badges, Mode Switcher & Score
+            // 2. Update HUD Badges, Mode Switcher, Resources & Score
             document.getElementById('hudScoreValue').textContent = gameState.score;
             document.getElementById('hudCaseIdBadge').textContent = gameState.caseId;
             document.getElementById('titleCaseBadge').textContent = `DOKUMEN INVESTIGASI • ${gameState.caseId}`;
+            renderResourceMeters();
 
             const hudEasy = document.getElementById('hudBtnEasy');
             const hudHard = document.getElementById('hudBtnHard');
@@ -2806,7 +3387,7 @@
             }
 
             const prevBtn = document.getElementById('btnPrevScreen');
-            prevBtn.disabled = gameState.currentScreen <= 1;
+            prevBtn.disabled = gameState.currentScreen <= 1 || gameState.gameOver;
 
             // 3. Update Progress Stepper Nodes (1 - 6)
             const stepNodes = document.querySelectorAll('.step-node');
@@ -2820,7 +3401,7 @@
                     node.classList.add('completed');
                 }
 
-                if (stepNum <= gameState.highestUnlockedScreen) {
+                if (stepNum <= gameState.highestUnlockedScreen && !gameState.gameOver) {
                     node.classList.add('clickable');
                 }
             });
@@ -2843,7 +3424,7 @@
             }
 
             const evChip2 = document.getElementById('evChip2');
-            const evText2 = document.getElementById('evText2');
+            const evText2 = document.getElementById('evChip2');
             if (gameState.cipherSolved) {
                 evChip2.classList.add('unlocked');
                 evText2.textContent = `2. Kunci: x = ${gameState.initialClueX}`;
@@ -2853,7 +3434,7 @@
             }
 
             const evChip3 = document.getElementById('evChip3');
-            const evText3 = document.getElementById('evText3');
+            const evText3 = document.getElementById('evChip3');
             if (gameState.functionSolved) {
                 evChip3.classList.add('unlocked');
                 evText3.textContent = `3. Kode Brankas: ${gameState.accessCode}`;
@@ -2863,7 +3444,7 @@
             }
 
             const evChip4 = document.getElementById('evChip4');
-            const evText4 = document.getElementById('evChip4');
+            const evText4 = document.getElementById('evText4');
             if (gameState.safeUnlocked) {
                 evChip4.classList.add('unlocked');
                 evText4.textContent = '4. Artefak Emas';
@@ -2916,6 +3497,7 @@
         }
 
         function handleOpenEnvelope() {
+            if (gameState.gameOver) return;
             if (!gameState.envelopeOpened) {
                 SoundEngine.paperOpen();
                 gameState.envelopeOpened = true;
@@ -2974,6 +3556,7 @@
 
         function renderScreen3State() {
             const shift = gameState.cipherShift;
+            const hintCost = getPenaltyAmount(gameState.difficulty);
             document.getElementById('cipherStageTag').innerHTML = `Tahap 2 &bull; Dekripsi Sandi Caesar (${gameState.difficulty} MODE)`;
             document.getElementById('cipherNarrativeText').innerHTML =
                 `"Periksa urutan alfabet dengan saksama. Pengirim pesan menggeser setiap huruf maju <strong>${shift} langkah</strong>. Untuk mendekripsinya, geser setiap huruf pada kata <strong>${gameState.cipherText}</strong> mundur <strong>${shift} langkah</strong>!"`;
@@ -2988,15 +3571,23 @@
 
             const inputEl = document.getElementById('inputCipherAnswer');
             const btnSubmit = document.getElementById('btnDecryptSubmit');
+            const btnHint = document.getElementById('btnCipherHint');
             const nextContainer = document.getElementById('cipherNextContainer');
             const nextBtn = document.getElementById('btnGoToFunctionMachine');
             const stampEl = document.getElementById('cipherStamp');
             const feedbackBox = document.getElementById('cipherFeedbackBox');
 
+            if (gameState.cipherHintLevel >= 3) {
+                btnHint.innerHTML = `&#128161; LIHAT HINT (TERBUKA)`;
+            } else {
+                btnHint.innerHTML = `&#128161; HINT (-${hintCost} Poin Hint)`;
+            }
+
             if (gameState.cipherSolved) {
                 inputEl.value = gameState.decryptedMessage;
                 inputEl.disabled = true;
                 btnSubmit.disabled = true;
+                btnHint.disabled = true;
                 nextContainer.style.display = 'flex';
                 nextBtn.innerHTML = `LANJUT KE MESIN FUNGSI (PETUNJUK x = ${gameState.initialClueX}) &#8594;`;
                 stampEl.textContent = 'DECRYPTED';
@@ -3011,8 +3602,9 @@
                     </div>
                 `;
             } else {
-                inputEl.disabled = false;
-                btnSubmit.disabled = false;
+                inputEl.disabled = gameState.gameOver;
+                btnSubmit.disabled = gameState.gameOver;
+                btnHint.disabled = gameState.gameOver;
                 nextContainer.style.display = 'none';
                 stampEl.textContent = 'ENCRYPTED';
                 stampEl.classList.remove('solved-stamp');
@@ -3020,23 +3612,23 @@
         }
 
         function handleDecryptSubmit() {
-            if (gameState.cipherSolved) return;
+            if (gameState.cipherSolved || gameState.gameOver) return;
 
             const inputEl = document.getElementById('inputCipherAnswer');
             const rawInput = inputEl.value.trim().toUpperCase();
             const feedbackBox = document.getElementById('cipherFeedbackBox');
 
+            // Input kosong tidak mengurangi nyawa atau hint points
             if (!rawInput) {
                 SoundEngine.error();
                 feedbackBox.className = 'feedback-banner error';
-                feedbackBox.innerHTML = `<span>&#9888;</span><span>Silakan ketik hasil dekripsi terlebih dahulu pada kolom jawaban.</span>`;
+                feedbackBox.innerHTML = `<span>&#9888;</span><span>Silakan ketik hasil dekripsi terlebih dahulu pada kolom jawaban (tidak mengurangi Nyawa).</span>`;
                 return;
             }
 
             gameState.cipherAttempts += 1;
             document.getElementById('cipherAttemptsCount').textContent = gameState.cipherAttempts;
 
-            // Validasi nyata dengan fungsi caesarDecrypt(cipherText, cipherShift)
             const expectedPlaintext = caesarDecrypt(gameState.cipherText, gameState.cipherShift);
 
             if (rawInput === expectedPlaintext) {
@@ -3049,6 +3641,7 @@
                 renderAllUI();
             } else {
                 SoundEngine.error();
+                const lifeLost = deductLifePoints('Dekripsi Sandi Caesar');
                 const shiftedForward = caesarEncrypt(gameState.cipherText, gameState.cipherShift);
                 const firstCipherChar = gameState.cipherText[0];
                 const firstPlainChar = expectedPlaintext[0];
@@ -3062,60 +3655,83 @@
                 feedbackBox.innerHTML = `
                     <span>&#10060;</span>
                     <div>
-                        <strong>Jawaban "${rawInput}" belum tepat, Detektif.</strong><br>
+                        <strong>Jawaban "${rawInput}" belum tepat! (-${lifeLost} Poin Nyawa, sisa Nyawa: ${gameState.lifePoints}/100)</strong><br>
                         ${extraAdvice}
                     </div>
                 `;
+                renderAllUI();
             }
         }
 
         function handleCipherHint() {
-            const hintBox = document.getElementById('cipherHintBox');
-            if (!gameState.cipherHintUsed && !gameState.cipherSolved) {
-                gameState.cipherHintUsed = true;
-                updateScore(-10);
-            }
-            SoundEngine.click();
+            if (gameState.cipherSolved || gameState.gameOver) return;
 
+            const hintBox = document.getElementById('cipherHintBox');
+            const feedbackBox = document.getElementById('cipherFeedbackBox');
+            const res = tryConsumeHintPoints('cipher', 3);
+
+            if (res.status === 'insufficient') {
+                SoundEngine.error();
+                feedbackBox.className = 'feedback-banner error';
+                feedbackBox.innerHTML = `
+                    <span>&#9888;</span>
+                    <div>
+                        <strong>Hint Points Tidak Mencukupi!</strong><br>
+                        Dibutuhkan <strong>${res.cost} Hint Points</strong> untuk membuka petunjuk baru, tetapi Hint Points kamu tersisa <strong>${res.remaining}/100</strong>.
+                    </div>
+                `;
+                return;
+            }
+
+            SoundEngine.click();
             const shift = gameState.cipherShift;
             const cipherChars = gameState.cipherText.split('');
-            const previewCount = Math.min(3, cipherChars.length - 1);
-            let lines = [];
-            for (let i = 0; i < previewCount; i++) {
+            const level = res.level;
+
+            // Tampilkan petunjuk bertahap sesuai level yang sudah dibuka
+            const revealCount = Math.min(cipherChars.length - 1, level + 1);
+            const lines = [];
+            for (let i = 0; i < revealCount; i++) {
                 const c = cipherChars[i];
                 const p = caesarDecrypt(c, shift);
                 lines.push(`• Huruf ke-${i + 1} (<strong>${c}</strong>) digeser mundur ${shift} posisi &rarr; <strong>${p}</strong>`);
             }
 
+            const statusNote = res.status === 'already_unlocked'
+                ? `<em>(Seluruh petunjuk tahap ini sudah terbuka — tidak mengurangi Hint Points lagi)</em>`
+                : `<em>(-${res.cost} Hint Points &bull; Level Petunjuk ${level}/3 &bull; Sisa Hint Points: ${gameState.hintPoints}/100)</em>`;
+
             hintBox.style.display = 'flex';
             hintBox.innerHTML = `
                 <span>&#128161;</span>
                 <div>
-                    <strong>Petunjuk Dekripsi Caesar (Geser -${shift}):</strong><br>
+                    <strong>Petunjuk Dekripsi Caesar (Geser -${shift}):</strong> ${statusNote}<br>
                     ${lines.join('<br>')}<br>
-                    Lanjutkan dengan cara yang sama untuk sisa huruf lainnya!
+                    Lanjutkan pergeseran mundur ${shift} langkah untuk sisa huruf berikutnya!
                 </div>
             `;
+            renderAllUI();
         }
 
-        /* --- SCREEN 4: THE FUNCTION MACHINE --- */
+        /* --- SCREEN 4: THE FUNCTION MACHINE (STRICTLY LINEAR) --- */
         function renderScreen4State() {
             const clueX = gameState.initialClueX !== null ? gameState.initialClueX : gameState.targetClueX;
             const meta = getActiveCompositionMeta();
+            const hintCost = getPenaltyAmount(gameState.difficulty);
             const fFormulaStr = formatFunctionFormula('f', gameState.fSpec);
             const gFormulaStr = formatFunctionFormula('g', gameState.gSpec);
             const innerFormulaStr = formatFunctionFormula(meta.innerName, meta.innerSpec);
             const outerFormulaStr = formatFunctionFormula(meta.outerName, meta.outerSpec);
 
             document.getElementById('machineStageTag').innerHTML =
-                `Tahap 3 &bull; Mesin Kode Komposisi Fungsi (${gameState.difficulty} MODE)`;
+                `Tahap 3 &bull; Mesin Kode Komposisi Fungsi Linear (${gameState.difficulty} MODE)`;
             document.getElementById('machineNarrativeText').innerHTML =
-                `"Pesan <strong>${gameState.decryptedMessage || gameState.plainWord}</strong> membuka kompartemen rahasia berisi angka awal <strong>x = ${clueX}</strong>. Sekarang hitung komposisi <strong>${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}</strong> untuk menghasilkan kode akses brankas!"`;
+                `"Pesan <strong>${gameState.decryptedMessage || gameState.plainWord}</strong> membuka kompartemen rahasia berisi angka awal <strong>x = ${clueX}</strong>. Sekarang hitung komposisi dua fungsi linear <strong>${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}</strong> untuk menghasilkan kode akses brankas!"`;
 
             document.getElementById('machineTitleFormula').innerHTML =
                 `Mesin Komposisi Fungsi: ${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}`;
             document.getElementById('machineGivenFunctionsText').innerHTML =
-                `Diketahui: <strong>${fFormulaStr}</strong> dan <strong>${gFormulaStr}</strong> dengan nilai awal <strong>x = <span id="machineClueXLabel">${clueX}</span></strong>.`;
+                `Diketahui fungsi linear: <strong>${fFormulaStr}</strong> dan <strong>${gFormulaStr}</strong> dengan nilai awal <strong>x = <span id="machineClueXLabel">${clueX}</span></strong>.`;
 
             document.getElementById('machineSchematicBanner').innerHTML =
                 `ALUR PROSES ${meta.symbolNotation}(${clueX}): KERJAKAN FUNGSI DALAM <strong>${meta.innerName}(${clueX})</strong> DULU, LALU MASUKKAN KE FUNGSI LUAR <strong>${meta.outerName}</strong>`;
@@ -3128,13 +3744,14 @@
             document.getElementById('pipeOutputSublabel').textContent = meta.nestedNotation(clueX);
 
             document.getElementById('machineTheoryNote').innerHTML =
-                `<strong>&#128218; Catatan Penting Detektif (Urutan Fungsi):</strong><br>` +
-                `Pada komposisi <strong>${meta.symbolNotation}(x) = ${meta.nestedNotation('x')}</strong>, nilai <strong>x = ${clueX}</strong> wajib dimasukkan ke fungsi bagian dalam <strong>${meta.innerName}(x)</strong> terlebih dahulu, kemudian hasilnya dimasukkan ke fungsi luar <strong>${meta.outerName}(x)</strong>. Urutan sangat penting karena <strong>f(g(x)) &ne; g(f(x))</strong>!`;
+                `<strong>&#128218; Catatan Penting Detektif (Urutan Fungsi Linear):</strong><br>` +
+                `Pada komposisi <strong>${meta.symbolNotation}(x) = ${meta.nestedNotation('x')}</strong>, nilai <strong>x = ${clueX}</strong> wajib dimasukkan ke fungsi linear bagian dalam <strong>${meta.innerName}(x)</strong> terlebih dahulu, kemudian hasilnya dimasukkan ke fungsi linear luar <strong>${meta.outerName}(x)</strong>. Urutan sangat penting karena <strong>f(g(x)) &ne; g(f(x))</strong>!`;
 
             document.getElementById('machineAttemptsCount').textContent = gameState.functionAttempts;
 
             const inputEl = document.getElementById('inputMachineAnswer');
             const btnSubmit = document.getElementById('btnCalculateSubmit');
+            const btnHint = document.getElementById('btnMachineHint');
             const nextContainer = document.getElementById('machineNextContainer');
             const nextBtn = document.getElementById('btnGoToSafeBox');
             const nodeG = document.getElementById('machineNodeG');
@@ -3143,10 +3760,17 @@
             const feedbackBox = document.getElementById('machineFeedbackBox');
             const stampEl = document.getElementById('machineStamp');
 
+            if (gameState.functionHintLevel >= 3) {
+                btnHint.innerHTML = `&#128161; LIHAT HINT (TERBUKA)`;
+            } else {
+                btnHint.innerHTML = `&#128161; SHOW HINT (-${hintCost} Poin Hint)`;
+            }
+
             if (gameState.functionSolved) {
                 inputEl.value = gameState.accessCode;
                 inputEl.disabled = true;
                 btnSubmit.disabled = true;
+                btnHint.disabled = true;
                 nextContainer.style.display = 'flex';
                 nextBtn.innerHTML = `MENUJU BRANKAS RAHASIA (KODE: ${gameState.accessCode}) &#8594;`;
 
@@ -3174,8 +3798,9 @@
                     </div>
                 `;
             } else {
-                inputEl.disabled = false;
-                btnSubmit.disabled = false;
+                inputEl.disabled = gameState.gameOver;
+                btnSubmit.disabled = gameState.gameOver;
+                btnHint.disabled = gameState.gameOver;
                 nextContainer.style.display = 'none';
 
                 nodeG.classList.remove('energized');
@@ -3193,7 +3818,7 @@
         }
 
         function handleCalculateFunction() {
-            if (gameState.functionSolved) return;
+            if (gameState.functionSolved || gameState.gameOver) return;
 
             const inputEl = document.getElementById('inputMachineAnswer');
             const rawVal = inputEl.value.trim();
@@ -3201,18 +3826,25 @@
             const clueX = gameState.initialClueX !== null ? gameState.initialClueX : gameState.targetClueX;
             const meta = getActiveCompositionMeta();
 
+            // Input kosong tidak mengurangi nyawa atau hint points
             if (rawVal === '') {
                 SoundEngine.error();
                 feedbackBox.className = 'feedback-banner error';
-                feedbackBox.innerHTML = `<span>&#9888;</span><span>Masukkan angka hasil perhitungan ${meta.symbolNotation}(${clueX}) terlebih dahulu.</span>`;
+                feedbackBox.innerHTML = `<span>&#9888;</span><span>Masukkan angka hasil perhitungan ${meta.symbolNotation}(${clueX}) terlebih dahulu (tidak mengurangi Nyawa).</span>`;
                 return;
             }
 
             const numericAnswer = Number(rawVal);
+            if (Number.isNaN(numericAnswer)) {
+                SoundEngine.error();
+                feedbackBox.className = 'feedback-banner error';
+                feedbackBox.innerHTML = `<span>&#9888;</span><span>Masukkan format angka yang valid.</span>`;
+                return;
+            }
+
             gameState.functionAttempts += 1;
             document.getElementById('machineAttemptsCount').textContent = gameState.functionAttempts;
 
-            // Perhitungan nyata menggunakan composeFunctions(outerFn, innerFn, clueX)
             const compositionResult = composeFunctions(meta.outerFn, meta.innerFn, clueX);
             const reverseResult = composeFunctions(meta.innerFn, meta.outerFn, clueX);
 
@@ -3226,6 +3858,7 @@
                 renderAllUI();
             } else {
                 SoundEngine.error();
+                const lifeLost = deductLifePoints('Mesin Komposisi Fungsi');
                 let diagnosticMsg = `Coba hitung bertahap: masukkan <strong>x = ${clueX}</strong> ke fungsi dalam <code>${formatFunctionFormula(meta.innerName, meta.innerSpec)}</code> terlebih dahulu, lalu masukkan hasilnya ke fungsi luar <code>${formatFunctionFormula(meta.outerName, meta.outerSpec)}</code>.`;
 
                 if (numericAnswer === reverseResult.finalValue) {
@@ -3238,35 +3871,64 @@
                 feedbackBox.innerHTML = `
                     <span>&#10060;</span>
                     <div>
-                        <strong>Hasil ${numericAnswer} belum tepat, Detektif.</strong><br>
+                        <strong>Hasil ${numericAnswer} belum tepat! (-${lifeLost} Poin Nyawa, sisa Nyawa: ${gameState.lifePoints}/100)</strong><br>
                         ${diagnosticMsg}
                     </div>
                 `;
+                renderAllUI();
             }
         }
 
         function handleMachineHint() {
-            const hintBox = document.getElementById('machineHintBox');
-            if (!gameState.functionHintUsed && !gameState.functionSolved) {
-                gameState.functionHintUsed = true;
-                updateScore(-10);
-            }
-            SoundEngine.click();
+            if (gameState.functionSolved || gameState.gameOver) return;
 
+            const hintBox = document.getElementById('machineHintBox');
+            const feedbackBox = document.getElementById('machineFeedbackBox');
+            const res = tryConsumeHintPoints('machine', 3);
+
+            if (res.status === 'insufficient') {
+                SoundEngine.error();
+                feedbackBox.className = 'feedback-banner error';
+                feedbackBox.innerHTML = `
+                    <span>&#9888;</span>
+                    <div>
+                        <strong>Hint Points Tidak Mencukupi!</strong><br>
+                        Dibutuhkan <strong>${res.cost} Hint Points</strong> untuk membuka petunjuk baru, tetapi Hint Points kamu tersisa <strong>${res.remaining}/100</strong>.
+                    </div>
+                `;
+                return;
+            }
+
+            SoundEngine.click();
             const clueX = gameState.initialClueX !== null ? gameState.initialClueX : gameState.targetClueX;
             const meta = getActiveCompositionMeta();
             const step1 = composeFunctions(meta.outerFn, meta.innerFn, clueX);
             const innerStepStr = formatStepSubstitution(meta.innerName, meta.innerSpec, clueX, step1.innerValue);
+            const outerProd = meta.outerSpec.a * step1.innerValue;
+            const outerSign = meta.outerSpec.b >= 0 ? '+' : '-';
+            const outerAbsB = Math.abs(meta.outerSpec.b);
+
+            const statusNote = res.status === 'already_unlocked'
+                ? `<em>(Seluruh petunjuk tahap ini sudah terbuka — tidak mengurangi Hint Points lagi)</em>`
+                : `<em>(-${res.cost} Hint Points &bull; Level Petunjuk ${res.level}/3 &bull; Sisa Hint Points: ${gameState.hintPoints}/100)</em>`;
+
+            let stepsHtml = `1. Urutan pengerjaan <strong>${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}</strong>: kerjakan fungsi dalam <code>${formatFunctionFormula(meta.innerName, meta.innerSpec)}</code> untuk <code>x = ${clueX}</code>.`;
+            if (res.level >= 2) {
+                stepsHtml += `<br>2. Hasil fungsi dalam: <code>${innerStepStr}</code>.`;
+            }
+            if (res.level >= 3) {
+                stepsHtml += `<br>3. Substitusikan <strong>${step1.innerValue}</strong> ke fungsi luar <code>${formatFunctionFormula(meta.outerName, meta.outerSpec)}</code>: hitung <code>${meta.outerName}(${step1.innerValue}) = (${meta.outerSpec.a} × ${step1.innerValue}) ${outerSign} ${outerAbsB} = ${outerProd} ${outerSign} ${outerAbsB}</code>.`;
+            }
 
             hintBox.style.display = 'flex';
             hintBox.innerHTML = `
                 <span>&#128161;</span>
                 <div>
-                    <strong>Petunjuk Langkah Perhitungan ${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}:</strong><br>
-                    1. Hitung fungsi dalam: <code>${innerStepStr}</code>.<br>
-                    2. Substitusikan hasil <strong>${step1.innerValue}</strong> ke fungsi luar <code>${formatFunctionFormula(meta.outerName, meta.outerSpec)}</code>: hitung <code>${meta.outerName}(${step1.innerValue}) = ...</code>
+                    <strong>Petunjuk Komposisi Fungsi Linear:</strong> ${statusNote}<br>
+                    ${stepsHtml}
                 </div>
             `;
+            renderAllUI();
         }
 
         /* --- SCREEN 5: THE LOCKED BOX (SAFE KEYPAD) --- */
@@ -3280,6 +3942,11 @@
             const feedbackBox = document.getElementById('safeFeedbackBox');
 
             displayEl.textContent = gameState.currentKeypadInput || '--';
+
+            const allKeyBtns = document.querySelectorAll('#keypadButtonsContainer .key-btn');
+            allKeyBtns.forEach(btn => {
+                btn.disabled = gameState.safeUnlocked || gameState.gameOver;
+            });
 
             if (gameState.safeUnlocked) {
                 cabinetEl.classList.add('unlocked');
@@ -3307,7 +3974,7 @@
         }
 
         function handleKeypadDigit(digit) {
-            if (gameState.safeUnlocked) return;
+            if (gameState.safeUnlocked || gameState.gameOver) return;
             if (gameState.currentKeypadInput.length < 4) {
                 SoundEngine.keypadBeep();
                 gameState.currentKeypadInput += String(digit);
@@ -3316,14 +3983,14 @@
         }
 
         function handleKeypadClear() {
-            if (gameState.safeUnlocked) return;
+            if (gameState.safeUnlocked || gameState.gameOver) return;
             SoundEngine.click();
             gameState.currentKeypadInput = '';
             document.getElementById('keypadDisplayValue').textContent = '--';
         }
 
         function handleKeypadEnter() {
-            if (gameState.safeUnlocked) return;
+            if (gameState.safeUnlocked || gameState.gameOver) return;
 
             if (!gameState.functionSolved || gameState.accessCode === null) {
                 SoundEngine.error();
@@ -3331,10 +3998,11 @@
             }
 
             const feedbackBox = document.getElementById('safeFeedbackBox');
+            // Input kosong tidak mengurangi nyawa
             if (!gameState.currentKeypadInput) {
                 SoundEngine.error();
                 feedbackBox.className = 'feedback-banner error';
-                feedbackBox.innerHTML = `<span>&#9888;</span><span>Masukkan kode angka menggunakan keypad terlebih dahulu!</span>`;
+                feedbackBox.innerHTML = `<span>&#9888;</span><span>Masukkan kode angka menggunakan keypad terlebih dahulu (tidak mengurangi Nyawa)!</span>`;
                 return;
             }
 
@@ -3353,23 +4021,27 @@
                 renderAllUI();
             } else {
                 SoundEngine.error();
+                const submittedCode = gameState.currentKeypadInput;
+                gameState.currentKeypadInput = '';
+                document.getElementById('keypadDisplayValue').textContent = 'ERR';
+
+                const lifeLost = deductLifePoints('Keypad Brankas Rahasia');
                 feedbackBox.className = 'feedback-banner error';
                 feedbackBox.innerHTML = `
                     <span>&#128274;</span>
                     <div>
-                        <strong>Kode "${gameState.currentKeypadInput}" Ditolak! Kotak tetap terkunci.</strong><br>
-                        Ingat kembali hasil akhir perhitungan komposisi fungsi <code>${meta.symbolNotation}(${clueX}) = ${gameState.accessCode}</code> pada tahap sebelumnya. Tekan CLEAR lalu coba lagi!
+                        <strong>Kode "${submittedCode}" Ditolak! (-${lifeLost} Poin Nyawa, sisa Nyawa: ${gameState.lifePoints}/100)</strong><br>
+                        Ingat kembali hasil akhir perhitungan komposisi fungsi <code>${meta.symbolNotation}(${clueX}) = ${gameState.accessCode}</code> pada tahap sebelumnya.
                     </div>
                 `;
-                gameState.currentKeypadInput = '';
-                document.getElementById('keypadDisplayValue').textContent = 'ERR';
+                renderAllUI();
             }
         }
 
         /* --- SCREEN 6: CASE CLOSED SUMMARY & DYNAMIC SOLUTION REVIEW --- */
         function renderScreen6Summary() {
             const totalAttempts = gameState.cipherAttempts + gameState.functionAttempts + gameState.safeAttempts;
-            const totalHints = (gameState.cipherHintUsed ? 1 : 0) + (gameState.functionHintUsed ? 1 : 0);
+            const totalHints = gameState.totalHintsPurchased;
             const clueX = gameState.initialClueX !== null ? gameState.initialClueX : gameState.targetClueX;
             const meta = getActiveCompositionMeta();
 
@@ -3380,14 +4052,13 @@
             document.getElementById('finalHintsStat').textContent = totalHints;
 
             let rankTitle = 'MASTER DETECTIVE';
-            if (gameState.score < 120 || totalAttempts > 6) {
+            if (gameState.lifePoints < 50 || totalAttempts > 6) {
                 rankTitle = 'INVESTIGATOR';
-            } else if (gameState.score < 150 || totalHints > 0) {
+            } else if (gameState.lifePoints < 80 || totalHints > 1) {
                 rankTitle = 'SENIOR DETECTIVE';
             }
             document.getElementById('finalRankStat').textContent = rankTitle;
 
-            // Ringkasan Tahapan Dinamis
             const summaryEl = document.getElementById('finalChecklistSummary');
             summaryEl.innerHTML = `
                 <h3 style="font-family: var(--font-serif); font-size: 1.05rem; color: var(--wood-darkest); margin-bottom: 0.5rem;">
@@ -3403,11 +4074,11 @@
                 </div>
                 <div class="checklist-item">
                     <span>&#9989;</span>
-                    <div><strong>Tahap 3 — Komposisi Fungsi:</strong> Menghitung <code>${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}</code> dengan <code>${meta.innerName}(${clueX}) = ${gameState.intermediateValue}</code> dan <code>${meta.outerName}(${gameState.intermediateValue}) = ${gameState.accessCode}</code>.</div>
+                    <div><strong>Tahap 3 — Komposisi Fungsi Linear:</strong> Menghitung <code>${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}</code> dengan <code>${meta.innerName}(${clueX}) = ${gameState.intermediateValue}</code> dan <code>${meta.outerName}(${gameState.intermediateValue}) = ${gameState.accessCode}</code>.</div>
                 </div>
                 <div class="checklist-item">
                     <span>&#9989;</span>
-                    <div><strong>Tahap 4 — Brankas Rahasia:</strong> Membuka brankas menggunakan kode akses <strong>${gameState.accessCode}</strong> dan menyelamatkan Artefak Emas.</div>
+                    <div><strong>Tahap 4 — Brankas &amp; Resource Akhir:</strong> Membuka brankas dengan kode <strong>${gameState.accessCode}</strong> (Sisa Nyawa: <strong>${gameState.lifePoints}/100</strong> &bull; Sisa Hint Points: <strong>${gameState.hintPoints}/100</strong>).</div>
                 </div>
             `;
 
@@ -3420,7 +4091,6 @@
             const clueX = gameState.initialClueX !== null ? gameState.initialClueX : gameState.targetClueX;
             const meta = getActiveCompositionMeta();
 
-            // Detail huruf demi huruf Sandi Caesar
             const letterBreakdown = gameState.cipherText.split('').map(c => {
                 const cPos = c.charCodeAt(0) - 64;
                 const p = caesarDecrypt(c, shift);
@@ -3428,7 +4098,6 @@
                 return `• Huruf '${c}' (ke-${cPos}) digeser -${shift} &rarr; '${p}' (ke-${pPos})`;
             }).join('<br>');
 
-            // Detail Komposisi Fungsi & Perbandingan Urutan Terbalik
             const forwardComp = composeFunctions(meta.outerFn, meta.innerFn, clueX);
             const reverseComp = composeFunctions(meta.innerFn, meta.outerFn, clueX);
 
@@ -3453,15 +4122,15 @@
                 </div>
 
                 <div class="solution-block">
-                    <h4>Bagian 2: Komposisi Fungsi ${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}</h4>
+                    <h4>Bagian 2: Komposisi Dua Fungsi Linear ${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}</h4>
                     <p style="font-size: 0.9rem; line-height: 1.55;">
-                        Diketahui: <strong>${formatFunctionFormula('f', gameState.fSpec)}</strong> dan <strong>${formatFunctionFormula('g', gameState.gSpec)}</strong> dengan input <strong>x = ${clueX}</strong>.
+                        Diketahui dua fungsi linear: <strong>${formatFunctionFormula('f', gameState.fSpec)}</strong> dan <strong>${formatFunctionFormula('g', gameState.gSpec)}</strong> dengan input <strong>x = ${clueX}</strong>.
                     </p>
                     <div class="math-step-code">
                         Ditanyakan: ${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}<br><br>
-                        Langkah 1 (Substitusi x = ${clueX} ke fungsi dalam ${meta.innerName}):<br>
+                        Langkah 1 (Substitusi x = ${clueX} ke fungsi linear bagian dalam ${meta.innerName}):<br>
                         ${step1Str}<br><br>
-                        Langkah 2 (Substitusi hasil ${meta.innerName}(${clueX}) = ${forwardComp.innerValue} ke fungsi luar ${meta.outerName}):<br>
+                        Langkah 2 (Substitusi hasil ${meta.innerName}(${clueX}) = ${forwardComp.innerValue} ke fungsi linear bagian luar ${meta.outerName}):<br>
                         ${step2Str}<br><br>
                         Jadi, hasil akhir ${meta.symbolNotation}(${clueX}) = ${forwardComp.finalValue} (Kode Akses Brankas).
                     </div>
@@ -3503,7 +4172,7 @@
             } else if (type === 'machine' && gameState.functionSolved) {
                 titleEl.textContent = '⚙️ Barang Bukti #3: Kode Akses Mesin Fungsi';
                 bodyEl.innerHTML = `
-                    <p>Hasil perhitungan komposisi fungsi <strong>${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}</strong>:</p>
+                    <p>Hasil perhitungan komposisi fungsi linear <strong>${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}</strong>:</p>
                     <div class="math-step-code">1. ${formatStepSubstitution(meta.innerName, meta.innerSpec, clueX, gameState.intermediateValue)}<br>2. ${formatStepSubstitution(meta.outerName, meta.outerSpec, gameState.intermediateValue, gameState.accessCode)}<br>Kode Akses Brankas = ${gameState.accessCode}</div>
                 `;
             } else if (type === 'artifact' && gameState.safeUnlocked) {
@@ -3521,67 +4190,80 @@
 
         /**
          * ========================================================================
-         * 8. EVENT LISTENERS INITIALIZATION (AUTO-RANDOMIZE ON EVERY RELOAD)
+         * 8. EVENT LISTENERS INITIALIZATION (AUTO-GENERATED CASE ON NEW TAB/RELOAD)
          * ========================================================================
          */
         window.addEventListener('DOMContentLoaded', () => {
-            // Setiap kali halaman di-reload atau dibuka oleh user baru, buat soal acak baru!
-            const savedDiff = sessionStorage.getItem(LAST_DIFFICULTY_KEY) || 'EASY';
-            gameState = createNewGameState(savedDiff, 1);
+            // Setiap kali tab baru dibuka atau halaman di-reload, otomatis hasilkan kasus baru
+            let initialDiff = 'EASY';
+            try {
+                const savedDiff = sessionStorage.getItem(LAST_DIFFICULTY_KEY);
+                if (savedDiff === 'EASY' || savedDiff === 'HARD') {
+                    initialDiff = savedDiff;
+                }
+            } catch (e) {}
 
             buildInteractiveAlphabetStrip();
-            renderAllUI();
+            startFreshCase(initialDiff, 1);
+
+            // Inisialisasi AudioContext & BGM pada interaksi pertama pengguna (sesuai kebijakan Autoplay browser)
+            const unlockAudioOnFirstGesture = () => {
+                if (SoundEngine.enabled) {
+                    SoundEngine.init();
+                    SoundEngine.updateAdaptiveMusic();
+                }
+            };
+            window.addEventListener('pointerdown', unlockAudioOnFirstGesture, { once: true });
+            window.addEventListener('keydown', unlockAudioOnFirstGesture, { once: true });
+
+            // Pause/Resume BGM saat tab tidak terlihat / kembali aktif
+            document.addEventListener('visibilitychange', () => {
+                SoundEngine.pageHidden = document.hidden;
+                SoundEngine.updateAdaptiveMusic();
+            });
 
             // Pemilihan Mode EASY / HARD di Title Screen (Screen 1)
             document.getElementById('cardSelectEasy').addEventListener('click', () => {
+                SoundEngine.click();
                 if (gameState.difficulty !== 'EASY') {
-                    triggerNewRandomCase('EASY', false);
-                } else {
-                    SoundEngine.click();
+                    startFreshCase('EASY', 1);
                 }
             });
             document.getElementById('cardSelectHard').addEventListener('click', () => {
+                SoundEngine.click();
                 if (gameState.difficulty !== 'HARD') {
-                    triggerNewRandomCase('HARD', false);
-                } else {
-                    SoundEngine.click();
+                    startFreshCase('HARD', 1);
                 }
             });
 
             // Pemilihan Mode EASY / HARD di Top HUD Bar
             document.getElementById('hudBtnEasy').addEventListener('click', () => {
+                SoundEngine.click();
                 if (gameState.difficulty !== 'EASY') {
-                    triggerNewRandomCase('EASY', true);
+                    const targetScreen = (gameState.currentScreen >= 2 && gameState.currentScreen <= 5) ? 2 : 1;
+                    startFreshCase('EASY', targetScreen);
                 }
             });
             document.getElementById('hudBtnHard').addEventListener('click', () => {
+                SoundEngine.click();
                 if (gameState.difficulty !== 'HARD') {
-                    triggerNewRandomCase('HARD', true);
+                    const targetScreen = (gameState.currentScreen >= 2 && gameState.currentScreen <= 5) ? 2 : 1;
+                    startFreshCase('HARD', targetScreen);
                 }
             });
 
-            // Tombol Acak Soal Baru (HUD, Title Screen, Screen 3, Screen 4)
-            document.getElementById('btnHudRandomize').addEventListener('click', () => {
-                triggerNewRandomCase(gameState.difficulty, true);
-            });
-            document.getElementById('btnRerollTitle').addEventListener('click', () => {
-                triggerNewRandomCase(gameState.difficulty, false);
-            });
-            document.getElementById('btnRerollScreen3').addEventListener('click', () => {
-                triggerNewRandomCase(gameState.difficulty, true);
-            });
-            document.getElementById('btnRerollScreen4').addEventListener('click', () => {
-                triggerNewRandomCase(gameState.difficulty, true);
-            });
-
-            // HUD Navigation
+            // HUD Navigation (Kembali ke Lobby tidak mereset kasus yang sedang berjalan)
             document.getElementById('btnHomeBrand').addEventListener('click', () => {
                 SoundEngine.click();
-                navigateToScreen(1);
+                if (gameState.gameOver) {
+                    startFreshCase(gameState.difficulty, 1);
+                } else {
+                    navigateToScreen(1);
+                }
             });
 
             document.getElementById('btnPrevScreen').addEventListener('click', () => {
-                if (gameState.currentScreen > 1) {
+                if (gameState.currentScreen > 1 && !gameState.gameOver) {
                     SoundEngine.click();
                     navigateToScreen(gameState.currentScreen - 1);
                 }
@@ -3589,6 +4271,7 @@
 
             document.querySelectorAll('.step-node').forEach(node => {
                 node.addEventListener('click', () => {
+                    if (gameState.gameOver) return;
                     const target = Number(node.getAttribute('data-step'));
                     if (target <= gameState.highestUnlockedScreen) {
                         SoundEngine.click();
@@ -3597,12 +4280,16 @@
                 });
             });
 
-            // Audio Toggle
+            // Audio Toggle (Mengontrol BGM dan SFX secara terpadu)
             const btnAudio = document.getElementById('btnToggleAudio');
             btnAudio.addEventListener('click', () => {
                 SoundEngine.enabled = !SoundEngine.enabled;
-                btnAudio.innerHTML = SoundEngine.enabled ? '&#128266; ON' : '&#128263; OFF';
-                if (SoundEngine.enabled) SoundEngine.click();
+                btnAudio.innerHTML = SoundEngine.enabled ? '&#128266; Audio: ON' : '&#128263; Audio: OFF';
+                if (SoundEngine.enabled) {
+                    SoundEngine.init();
+                    SoundEngine.click();
+                }
+                SoundEngine.updateAdaptiveMusic();
             });
 
             // Evidence Chips Click
@@ -3621,8 +4308,12 @@
             // Screen 1 Buttons
             document.getElementById('btnStartGame').addEventListener('click', () => {
                 SoundEngine.click();
-                unlockNextStage(2);
-                navigateToScreen(2);
+                if (gameState.gameOver || gameState.safeUnlocked) {
+                    startFreshCase(gameState.difficulty, 2);
+                } else {
+                    unlockNextStage(2);
+                    navigateToScreen(2);
+                }
             });
 
             const modalHowTo = document.getElementById('modalHowToPlay');
@@ -3691,7 +4382,7 @@
 
             // Physical Keyboard Support on Screen 5
             window.addEventListener('keydown', (e) => {
-                if (gameState.currentScreen !== 5 || gameState.safeUnlocked) return;
+                if (gameState.currentScreen !== 5 || gameState.safeUnlocked || gameState.gameOver) return;
                 if (e.key >= '0' && e.key <= '9') {
                     handleKeypadDigit(e.key);
                 } else if (e.key === 'Backspace' || e.key === 'Delete') {
@@ -3721,9 +4412,20 @@
                 modalReview.classList.remove('open');
             });
 
-            // Play Again mengacak kasus baru secara otomatis
+            // Tombol MAIN LAGI pada layar akhir memulai kasus baru
             document.getElementById('btnPlayAgain').addEventListener('click', () => {
-                triggerNewRandomCase(gameState.difficulty, false);
+                SoundEngine.click();
+                startFreshCase(gameState.difficulty, 1);
+            });
+
+            // Modal Case Failed (Game Over) Actions
+            document.getElementById('btnFailedBackLobby').addEventListener('click', () => {
+                SoundEngine.click();
+                startFreshCase(gameState.difficulty, 1);
+            });
+            document.getElementById('btnFailedRetryCase').addEventListener('click', () => {
+                SoundEngine.click();
+                startFreshCase(gameState.difficulty, 2);
             });
         });
     </script>
