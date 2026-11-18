@@ -1149,92 +1149,6 @@
             margin-bottom: 1rem;
         }
 
-        /* Sub-stage Progress Indicator for HARD Mode (1. LINEAR & 2. INVERS) */
-        .hard-subprogress-bar {
-            display: none;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-            background: rgba(13, 22, 39, 0.08);
-            padding: 0.65rem;
-            border-radius: 10px;
-            border: 1.5px solid var(--cream-border);
-        }
-
-        .hard-subprogress-bar.visible {
-            display: grid;
-        }
-
-        .substage-pill {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.5rem;
-            padding: 0.55rem 0.85rem;
-            border-radius: 8px;
-            background: var(--navy-dark);
-            color: var(--cream-dark);
-            border: 2px solid var(--navy-accent);
-            font-family: var(--font-mono);
-            font-size: 0.8rem;
-            font-weight: 700;
-            transition: var(--transition-fast);
-        }
-
-        .substage-pill.active-question {
-            border-color: var(--gold-bright);
-            color: var(--cream-light);
-            box-shadow: 0 0 14px var(--gold-glow);
-            background: linear-gradient(135deg, var(--navy-main) 0%, var(--navy-dark) 100%);
-        }
-
-        .substage-pill.completed-question {
-            background: linear-gradient(135deg, #1b4332 0%, #0f291e 100%);
-            border-color: var(--success-light);
-            color: #d8f3dc;
-        }
-
-        .substage-status-tag {
-            padding: 0.15rem 0.5rem;
-            border-radius: 999px;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--cream-dark);
-        }
-
-        .substage-pill.active-question .substage-status-tag {
-            background: rgba(245, 205, 71, 0.22);
-            color: var(--gold-bright);
-            border: 1px solid var(--gold-main);
-        }
-
-        .substage-pill.completed-question .substage-status-tag {
-            background: rgba(82, 183, 136, 0.25);
-            color: #95d5b2;
-            border: 1px solid var(--success-light);
-        }
-
-        .linear-solved-summary-banner {
-            display: none;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            background: rgba(43, 122, 75, 0.12);
-            border: 1.5px solid var(--success-main);
-            color: #1b4332;
-            padding: 0.65rem 1rem;
-            border-radius: 8px;
-            margin-bottom: 0.9rem;
-            font-size: 0.86rem;
-        }
-
-        .linear-solved-summary-banner.visible {
-            display: flex;
-        }
-
         /* ==========================================================================
            10. SCREEN 5: THE LOCKED BOX (SAFE & KEYPAD)
            ========================================================================== */
@@ -1719,9 +1633,6 @@
                 justify-content: center;
                 width: 100%;
             }
-            .hard-subprogress-bar.visible {
-                grid-template-columns: 1fr;
-            }
         }
     </style>
 </head>
@@ -1964,9 +1875,7 @@
                                 </div>
                                 <p class="mode-card-desc">
                                     • <strong>Sandi Caesar:</strong> Kata 6–8 huruf, geseran kunci 4–13 posisi.<br>
-                                    • <strong>2 Soal Berurutan (Tahap 3):</strong><br>
-                                      1) <em>Komposisi Fungsi Linear</em> <code>(f &#8728; g)(x)</code> atau <code>(g &#8728; f)(x)</code>.<br>
-                                      2) <em>Fungsi Invers</em> <code>f&#8315;&#185;(y) = (y - b) / a</code> sebagai kode brankas!<br>
+                                    • <strong>Komposisi Fungsi (Tahap 3):</strong> Selesaikan satu soal fungsi linear dengan koefisien 1–3, konstanta 0–3, dan x = 1–3. Hasilnya menjadi kode brankas.<br>
                                     • <strong>Resource:</strong> Salah -20 Nyawa &bull; Hint -20 Poin Hint.
                                 </p>
                             </div>
@@ -2114,7 +2023,7 @@
             </section>
 
             <!-- ==================================================================
-                 SCREEN 4 — THE FUNCTION MACHINE (KOMPOSISI FUNGSI & INVERS)
+                 SCREEN 4 — THE FUNCTION MACHINE (KOMPOSISI FUNGSI)
                  ================================================================== -->
             <section class="game-screen" id="screen-4">
                 <div class="narrative-box">
@@ -2141,23 +2050,6 @@
                                 Percobaan: <span id="machineAttemptsCount">0</span>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- HARD MODE SUB-STAGE PROGRESS INDICATOR (1. LINEAR & 2. INVERS) -->
-                    <div class="hard-subprogress-bar" id="hardSubProgressBar" aria-label="Progres Soal Tahap 3 Mode Hard">
-                        <div class="substage-pill active-question" id="subPillLinear">
-                            <span>1. LINEAR (KOMPOSISI)</span>
-                            <span class="substage-status-tag" id="subStatusLinear">Belum</span>
-                        </div>
-                        <div class="substage-pill" id="subPillInvers">
-                            <span>2. INVERS (f&#8315;&#185;)</span>
-                            <span class="substage-status-tag" id="subStatusInvers">Belum</span>
-                        </div>
-                    </div>
-
-                    <!-- Banner Ringkasan Soal 1 Linear setelah selesai di Mode HARD -->
-                    <div class="linear-solved-summary-banner" id="hardSoal1SolvedBanner">
-                        <!-- Diisi dinamis ketika Soal 1 selesai pada Mode HARD -->
                     </div>
 
                     <!-- Visual Function Machine Pipeline -->
@@ -2216,7 +2108,7 @@
                         </div>
                     </div>
 
-                    <!-- Educational Note on Order of Functions / Inverse Derivation -->
+                    <!-- Educational Note on Order of Functions -->
                     <div class="theory-note-card" id="machineTheoryNote">
                         <strong>&#128218; Catatan Penting Detektif (Urutan Fungsi):</strong><br>
                         Pada komposisi <strong>(f &#8728; g)(x) = f(g(x))</strong>, nilai <strong>x</strong> wajib dimasukkan ke fungsi bagian dalam terlebih dahulu, kemudian hasilnya dimasukkan ke fungsi luar. Perhatikan bahwa urutan sangat penting karena secara umum <strong>f(g(x)) &ne; g(f(x))</strong>!
@@ -2230,6 +2122,7 @@
                             class="detective-input" 
                             placeholder="HASIL" 
                             aria-label="Masukkan hasil komposisi fungsi"
+                            step="1"
                         />
                         <button class="btn btn-gold" id="btnCalculateSubmit">
                             &#9881; CALCULATE
@@ -2425,9 +2318,7 @@
                 <h4>3. Dua Mode Kesulitan (EASY &amp; HARD)</h4>
                 <ul style="padding-left: 1.2rem; font-size: 0.92rem; line-height: 1.6;">
                     <li><strong>MODE EASY (Detektif Muda):</strong> Kata sandi 4–5 huruf dengan pergeseran 1–5 langkah, serta 1 soal komposisi dua fungsi linear <code>(f &#8728; g)(x) = f(g(x))</code> yang hasilnya langsung menjadi kode brankas.</li>
-                    <li><strong>MODE HARD (Master Detektif):</strong> Kata sandi 6–8 huruf dengan pergeseran 4–13 langkah, dilanjutkan dengan <strong>2 soal berurutan</strong> pada Tahap 3:<br>
-                        1) <strong>Soal 1 (Komposisi Fungsi Linear):</strong> Menyelesaikan <code>(f &#8728; g)(x)</code> atau <code>(g &#8728; f)(x)</code> dengan koefisien &amp; konstanta positif/negatif.<br>
-                        2) <strong>Soal 2 (Fungsi Invers):</strong> Menentukan nilai <code>f&#8315;&#185;(y)</code> dari fungsi linear <code>f(x) = ax + b</code> menggunakan rumus <code>y = ax + b &rArr; f&#8315;&#185;(x) = (x - b) / a</code> sebagai kode akses brankas!</li>
+                    <li><strong>MODE HARD (Master Detektif):</strong> Kata sandi 6–8 huruf dengan pergeseran 4–13 langkah, dilanjutkan satu soal komposisi fungsi linear <code>(f &#8728; g)(x)</code> atau <code>(g &#8728; f)(x)</code>. Nilai <strong>x</strong> dan koefisien 1–3, konstanta 0–3; hasil bulat 1–50 menjadi kode akses brankas.</li>
                 </ul>
             </div>
 
@@ -2436,7 +2327,6 @@
                 <ul style="padding-left: 1.2rem; font-size: 0.92rem; line-height: 1.6;">
                     <li><strong>Sandi Caesar (Caesar Cipher):</strong> Menggeser setiap huruf pada alfabet A–Z sejauh kunci <em>k</em>. Untuk mendekripsi, geser huruf mundur sebanyak <em>k</em> posisi.</li>
                     <li><strong>Komposisi Fungsi Linear:</strong> Kerjakan fungsi yang berada di bagian <strong>dalam kurung</strong> terlebih dahulu, lalu substitusikan hasilnya ke fungsi <strong>luar</strong>.</li>
-                    <li><strong>Fungsi Invers Linear (Khusus Mode HARD):</strong> Jika diketahui <code>y = ax + b</code>, maka <code>ax = y - b</code> sehingga rumus fungsi inversnya adalah <code>f&#8315;&#185;(x) = (x - b) / a</code>.</li>
                 </ul>
             </div>
 
@@ -2992,38 +2882,8 @@
         }
 
         /**
-         * Evaluasi & Pemformatan Fungsi Invers Linear (Soal 2 Mode HARD)
-         * Diketahui f(x) = ax + b, maka y = ax + b <=> f⁻¹(x) = (x - b) / a
-         */
-        function evaluateLinearInverse(invSpec, yVal = invSpec.y) {
-            return (Number(yVal) - Number(invSpec.b)) / Number(invSpec.a);
-        }
-
-        function formatInverseFormulaString(invSpec, varChar = 'x') {
-            const a = Number(invSpec.a);
-            const b = Number(invSpec.b);
-            if (b === 0) {
-                return `f⁻¹(${varChar}) = ${varChar} / ${a}`;
-            }
-            const sign = b > 0 ? '-' : '+';
-            const absB = Math.abs(b);
-            return `f⁻¹(${varChar}) = (${varChar} ${sign} ${absB}) / ${a}`;
-        }
-
-        function formatInverseStepCalculation(invSpec) {
-            const a = Number(invSpec.a);
-            const b = Number(invSpec.b);
-            const y = Number(invSpec.y);
-            const numerator = y - b;
-            const result = numerator / a;
-            const sign = b >= 0 ? '-' : '+';
-            const absB = Math.abs(b);
-            return `f⁻¹(${y}) = (${y} ${sign} ${absB}) / ${a} = ${numerator} / ${a} = ${result}`;
-        }
-
-        /**
          * ========================================================================
-         * 3. AUTOMATIC CASE GENERATOR (LINEAR COMPOSITION & INVERSE FUNCTION)
+         * 3. AUTOMATIC CASE GENERATOR (LINEAR COMPOSITION)
          * ========================================================================
          */
         const CASE_HISTORY_STORAGE_KEY = 'SECRET_ENVELOPE_CASE_HISTORY_V2';
@@ -3080,9 +2940,7 @@
         }
 
         /**
-         * Menghasilkan paket soal acak baru berdasarkan tingkat kesulitan ('EASY' atau 'HARD').
-         * Seluruh fungsi f(x) dan g(x) pada EASY maupun HARD dijamin bertipe LINEAR:
-         * f(x) = ax + b dan g(x) = cx + d.
+         * Menghasilkan paket kasus acak. HARD memakai angka kecil dan hasil komposisi bulat 1–50.
          */
         function generateRandomCaseConfig(difficulty = 'EASY') {
             const recentSignatures = getRecentCaseHistory();
@@ -3094,7 +2952,7 @@
                 const plainWord = randomChoice(WORD_POOLS[difficulty]);
                 const shift = difficulty === 'EASY' ? randomInt(1, 5) : randomInt(4, 13);
                 const cipherText = caesarEncrypt(plainWord, shift);
-                const targetX = difficulty === 'EASY' ? randomInt(2, 8) : randomInt(3, 11);
+                const targetX = difficulty === 'EASY' ? randomInt(2, 8) : randomInt(1, 3);
 
                 let fSpec, gSpec, compositionOrder;
 
@@ -3122,34 +2980,9 @@
                     fSpec = chosen.f;
                     gSpec = chosen.g;
                 } else {
-                    // HARD Mode: Semua fungsi WAJIB LINEAR f(x) = ax + b dan g(x) = cx + d
-                    // Dengan koefisien bervariasi, konstanta positif/negatif, serta urutan (f o g) atau (g o f)
                     compositionOrder = Math.random() < 0.5 ? 'fog' : 'gof';
-                    const hardLinearTemplates = [
-                        // Tipe 1: f(x) = ax + b (positif), g(x) = cx - d (negatif)
-                        () => ({
-                            f: { type: 'linear', a: randomInt(3, 6), b: randomInt(3, 11) },
-                            g: { type: 'linear', a: randomInt(2, 5), b: -randomInt(2, 7) }
-                        }),
-                        // Tipe 2: f(x) = ax - b (negatif), g(x) = cx + d (positif)
-                        () => ({
-                            f: { type: 'linear', a: randomInt(3, 6), b: -randomInt(3, 9) },
-                            g: { type: 'linear', a: randomInt(2, 5), b: randomInt(4, 10) }
-                        }),
-                        // Tipe 3: f(x) = ax + b, g(x) = cx + d (keduanya konstanta positif besar)
-                        () => ({
-                            f: { type: 'linear', a: randomInt(2, 6), b: randomInt(4, 12) },
-                            g: { type: 'linear', a: randomInt(3, 6), b: randomInt(2, 9) }
-                        }),
-                        // Tipe 4: f(x) = ax - b, g(x) = cx - d (keduanya konstanta negatif)
-                        () => ({
-                            f: { type: 'linear', a: randomInt(3, 6), b: -randomInt(2, 8) },
-                            g: { type: 'linear', a: randomInt(3, 5), b: -randomInt(2, 6) }
-                        })
-                    ];
-                    const chosen = randomChoice(hardLinearTemplates)();
-                    fSpec = chosen.f;
-                    gSpec = chosen.g;
+                    fSpec = { type: 'linear', a: randomInt(1, 3), b: randomInt(0, 3) };
+                    gSpec = { type: 'linear', a: randomInt(1, 3), b: randomInt(0, 3) };
                 }
 
                 // Evaluasi kedua urutan komposisi untuk validasi matematika
@@ -3161,40 +2994,19 @@
                 const targetVal = compositionOrder === 'fog' ? fogVal : gofVal;
                 const innerVal = compositionOrder === 'fog' ? gOfX : fOfX;
 
-                // Buat spesifikasi Soal 2: Fungsi Invers Linear f(x) = ax + b, cari f⁻¹(y)
-                // Pastikan a != 0, hasil f⁻¹(y) bilangan bulat positif valid untuk PIN brankas (1..9999)
-                const invA = randomInt(2, 8);
-                const invSign = Math.random() < 0.5 ? 1 : -1;
-                const invB = invSign * randomInt(3, 25);
-                let invAnswer = randomInt(12, 160);
-                if (invAnswer === targetVal) {
-                    invAnswer += randomInt(3, 15);
-                }
-                const invY = invA * invAnswer + invB;
-                const inverseSpec = {
-                    type: 'linear',
-                    a: invA,
-                    b: invB,
-                    y: invY,
-                    answer: invAnswer
-                };
+                const sig = difficulty === 'HARD'
+                    ? `HARD|${targetX}|L_${fSpec.a}_${fSpec.b}|L_${gSpec.a}_${gSpec.b}|${compositionOrder}`
+                    : `EASY|${plainWord}|${shift}|${targetX}|L_${fSpec.a}_${fSpec.b}|L_${gSpec.a}_${gSpec.b}|${compositionOrder}`;
+                const integerResults = [innerVal, targetVal, fogVal, gofVal].every(Number.isInteger);
+                const resultInRange = difficulty === 'HARD'
+                    ? targetVal >= 1 && targetVal <= 50
+                    : targetVal >= 1 && targetVal <= 9999;
 
-                const inverseCheck = (inverseSpec.y - inverseSpec.b) / inverseSpec.a;
-                const invSigPart = difficulty === 'HARD'
-                    ? `|INV_${invA}_${invB}_${invY}`
-                    : '';
-                const sig = `${difficulty}|${plainWord}|${shift}|${targetX}|L_${fSpec.a}_${fSpec.b}|L_${gSpec.a}_${gSpec.b}|${compositionOrder}${invSigPart}`;
-
-                // Pastikan nilai antara, nilai komposisi, dan nilai invers valid serta belum ada di riwayat
                 if (
                     innerVal > 0 &&
-                    targetVal >= 1 &&
-                    targetVal <= 9999 &&
+                    integerResults &&
+                    resultInRange &&
                     fogVal !== gofVal &&
-                    Number.isInteger(inverseCheck) &&
-                    inverseCheck === invAnswer &&
-                    invAnswer >= 1 &&
-                    invAnswer <= 9999 &&
                     !recentSignatures.includes(sig)
                 ) {
                     const caseNum = randomInt(100, 999);
@@ -3209,26 +3021,78 @@
                         fSpec,
                         gSpec,
                         compositionOrder,
-                        inverseSpec,
                         signature: sig
                     };
                     break;
                 }
             }
 
-            // Fallback linear & invers aman jika seluruh percobaan bertabrakan
+            // Cari kombinasi HARD yang belum dipakai jika pengulangan acak bertabrakan.
+            if (!candidate && difficulty === 'HARD') {
+                search:
+                for (const plainWord of WORD_POOLS.HARD) {
+                    for (let shift = 4; shift <= 13; shift++) {
+                        for (let targetX = 1; targetX <= 3; targetX++) {
+                            for (let fA = 1; fA <= 3; fA++) {
+                                for (let fB = 0; fB <= 3; fB++) {
+                                    for (let gA = 1; gA <= 3; gA++) {
+                                        for (let gB = 0; gB <= 3; gB++) {
+                                            for (const compositionOrder of ['fog', 'gof']) {
+                                                const fSpec = { type: 'linear', a: fA, b: fB };
+                                                const gSpec = { type: 'linear', a: gA, b: gB };
+                                                const gOfX = evalFunctionSpec(gSpec, targetX);
+                                                const fOfX = evalFunctionSpec(fSpec, targetX);
+                                                const fogVal = evalFunctionSpec(fSpec, gOfX);
+                                                const gofVal = evalFunctionSpec(gSpec, fOfX);
+                                                const targetVal = compositionOrder === 'fog' ? fogVal : gofVal;
+                                                const sig = `HARD|${targetX}|L_${fA}_${fB}|L_${gA}_${gB}|${compositionOrder}`;
+
+                                                if (
+                                                    Number.isInteger(targetVal) &&
+                                                    targetVal >= 1 &&
+                                                    targetVal <= 50 &&
+                                                    fogVal !== gofVal &&
+                                                    !recentSignatures.includes(sig)
+                                                ) {
+                                                    const caseNum = randomInt(100, 999);
+                                                    const prefixLetter = String.fromCharCode(65 + randomInt(0, 25));
+                                                    candidate = {
+                                                        caseId: `CASE #${prefixLetter}${caseNum}-HARD`,
+                                                        difficulty: 'HARD',
+                                                        plainWord,
+                                                        cipherText: caesarEncrypt(plainWord, shift),
+                                                        cipherShift: shift,
+                                                        targetX,
+                                                        fSpec,
+                                                        gSpec,
+                                                        compositionOrder,
+                                                        signature: sig
+                                                    };
+                                                    break search;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             if (!candidate) {
-                const isHard = difficulty === 'HARD';
-                const fallbackWord = isHard ? 'MYSTERY' : 'HELLO';
-                const fallbackShift = isHard ? 5 : 3;
-                const fallbackX = isHard ? 6 : 4;
-                const fallbackF = isHard ? { type: 'linear', a: 3, b: 5 } : { type: 'linear', a: 1, b: 3 };
-                const fallbackG = isHard ? { type: 'linear', a: 2, b: -4 } : { type: 'linear', a: 2, b: 0 };
+                if (difficulty !== 'EASY') {
+                    throw new Error('Tidak dapat menghasilkan kombinasi soal HARD yang valid dan berbeda.');
+                }
+                const fallbackWord = 'HELLO';
+                const fallbackShift = 3;
+                const fallbackX = 4;
+                const fallbackF = { type: 'linear', a: 1, b: 3 };
+                const fallbackG = { type: 'linear', a: 2, b: 0 };
                 const fallbackOrder = 'fog';
-                const fallbackInverse = { type: 'linear', a: 4, b: -7, y: 85, answer: 23 };
-                const fallbackSig = `${difficulty}|${fallbackWord}|${fallbackShift}|${fallbackX}|L_${fallbackF.a}_${fallbackF.b}|L_${fallbackG.a}_${fallbackG.b}|${fallbackOrder}|INV_4_-7_85`;
+                const fallbackSig = `${difficulty}|${fallbackWord}|${fallbackShift}|${fallbackX}|L_${fallbackF.a}_${fallbackF.b}|L_${fallbackG.a}_${fallbackG.b}|${fallbackOrder}`;
                 candidate = {
-                    caseId: `CASE #D404-${difficulty}`,
+                    caseId: `CASE #D404-EASY`,
                     difficulty,
                     plainWord: fallbackWord,
                     cipherText: caesarEncrypt(fallbackWord, fallbackShift),
@@ -3237,7 +3101,6 @@
                     fSpec: fallbackF,
                     gSpec: fallbackG,
                     compositionOrder: fallbackOrder,
-                    inverseSpec: fallbackInverse,
                     signature: fallbackSig
                 };
             }
@@ -3284,22 +3147,12 @@
                 targetClueX: config.targetX,
                 initialClueX: startAtScreen > 3 ? config.targetX : null,
                 // Stage 4: Function Machine State
-                // Soal 1: Komposisi Fungsi Linear
                 fSpec: config.fSpec,
                 gSpec: config.gSpec,
                 compositionOrder: config.compositionOrder, // 'fog' | 'gof'
-                linearSolved: false,
-                linearResult: null,
                 intermediateValue: null,
                 functionAttempts: 0,
                 functionHintLevel: 0,
-                // Soal 2 (Khusus Mode HARD): Fungsi Invers f(x) = ax + b -> f⁻¹(y)
-                inverseSpec: config.inverseSpec,
-                inverseSolved: false,
-                inverseResult: null,
-                inverseAttempts: 0,
-                inverseHintLevel: 0,
-                hardSubStage: 1, // 1 = Soal 1 (Linear), 2 = Soal 2 (Invers)
                 // Status Akhir Tahap 3 (Mesin Fungsi)
                 functionSolved: false,
                 accessCode: null,
@@ -3345,8 +3198,6 @@
             let levelProp = 'functionHintLevel';
             if (stageKey === 'cipher') {
                 levelProp = 'cipherHintLevel';
-            } else if (stageKey === 'machine_inverse') {
-                levelProp = 'inverseHintLevel';
             }
 
             const currentLevel = gameState[levelProp] || 0;
@@ -3618,9 +3469,6 @@
             if (gameState.functionSolved) {
                 evChip3.classList.add('unlocked');
                 evText3.textContent = `3. Kode Brankas: ${gameState.accessCode}`;
-            } else if (gameState.difficulty === 'HARD' && gameState.linearSolved) {
-                evChip3.classList.add('unlocked');
-                evText3.textContent = `3. Linear: ${gameState.linearResult} | Invers [?]`;
             } else {
                 evChip3.classList.remove('unlocked');
                 evText3.textContent = '3. Kode Brankas [?]';
@@ -3892,7 +3740,7 @@
             renderAllUI();
         }
 
-        /* --- SCREEN 4: THE FUNCTION MACHINE (EASY: 1 SOAL LINEAR | HARD: 2 SOAL BERURUTAN LINEAR -> INVERS) --- */
+        /* --- SCREEN 4: THE FUNCTION MACHINE (ONE LINEAR COMPOSITION) --- */
         function renderScreen4State() {
             const isHard = gameState.difficulty === 'HARD';
             const clueX = gameState.initialClueX !== null ? gameState.initialClueX : gameState.targetClueX;
@@ -3902,61 +3750,6 @@
             const gFormulaStr = formatFunctionFormula('g', gameState.gSpec);
             const innerFormulaStr = formatFunctionFormula(meta.innerName, meta.innerSpec);
             const outerFormulaStr = formatFunctionFormula(meta.outerName, meta.outerSpec);
-
-            const subProgressBar = document.getElementById('hardSubProgressBar');
-            const subPillLinear = document.getElementById('subPillLinear');
-            const subPillInvers = document.getElementById('subPillInvers');
-            const subStatusLinear = document.getElementById('subStatusLinear');
-            const subStatusInvers = document.getElementById('subStatusInvers');
-            const soal1Banner = document.getElementById('hardSoal1SolvedBanner');
-
-            // Tampilkan Indikator Progres 2 Soal pada Mode HARD
-            if (isHard) {
-                subProgressBar.classList.add('visible');
-
-                subPillLinear.classList.remove('active-question', 'completed-question');
-                subPillInvers.classList.remove('active-question', 'completed-question');
-
-                if (gameState.linearSolved) {
-                    subPillLinear.classList.add('completed-question');
-                    subStatusLinear.textContent = 'Selesai ✓';
-                } else {
-                    subPillLinear.classList.add('active-question');
-                    subStatusLinear.textContent = 'Belum';
-                }
-
-                if (gameState.inverseSolved) {
-                    subPillInvers.classList.add('completed-question');
-                    subStatusInvers.textContent = 'Selesai ✓';
-                } else if (gameState.linearSolved) {
-                    subPillInvers.classList.add('active-question');
-                    subStatusInvers.textContent = 'Belum';
-                } else {
-                    subStatusInvers.textContent = 'Belum';
-                }
-
-                // Tampilkan ringkasan Soal 1 jika pemain sudah menyelesaikan Soal 1 di Mode HARD
-                if (gameState.linearSolved) {
-                    soal1Banner.classList.add('visible');
-                    soal1Banner.innerHTML = `
-                        <div>
-                            <strong>&#9989; Soal 1 (Komposisi Fungsi Linear) Selesai:</strong>
-                            <code>${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)} = ${gameState.linearResult}</code>
-                        </div>
-                        <span style="font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; color: var(--success-main);">
-                            LANJUT SOAL 2: FUNGSI INVERS &#8595;
-                        </span>
-                    `;
-                } else {
-                    soal1Banner.classList.remove('visible');
-                    soal1Banner.innerHTML = '';
-                }
-            } else {
-                subProgressBar.classList.remove('visible');
-                soal1Banner.classList.remove('visible');
-                soal1Banner.innerHTML = '';
-            }
-
             const inputEl = document.getElementById('inputMachineAnswer');
             const btnSubmit = document.getElementById('btnCalculateSubmit');
             const btnHint = document.getElementById('btnMachineHint');
@@ -3968,211 +3761,76 @@
             const feedbackBox = document.getElementById('machineFeedbackBox');
             const stampEl = document.getElementById('machineStamp');
 
-            // Tentukan apakah layar sedang menampilkan Soal 1 (Komposisi Linear) atau Soal 2 (Fungsi Invers di HARD)
-            const showingInverseQuestion = isHard && gameState.linearSolved;
+            document.getElementById('machineStageTag').innerHTML =
+                `Tahap 3 &bull; Mesin Komposisi Fungsi ${isHard ? '(HARD MODE)' : '(EASY MODE)'}`;
+            document.getElementById('machineNarrativeText').innerHTML =
+                `"Pesan <strong>${gameState.decryptedMessage || gameState.plainWord}</strong> membuka kompartemen rahasia berisi angka awal <strong>x = ${clueX}</strong>. Hitung komposisi fungsi <strong>${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}</strong> untuk menghasilkan kode akses brankas!"`;
+            document.getElementById('machineTitleFormula').innerHTML =
+                `Mesin Komposisi Fungsi: ${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}`;
+            document.getElementById('machineGivenFunctionsText').innerHTML =
+                `Diketahui fungsi linear: <strong>${fFormulaStr}</strong> dan <strong>${gFormulaStr}</strong> dengan nilai awal <strong>x = <span id="machineClueXLabel">${clueX}</span></strong>.`;
+            document.getElementById('machineSchematicBanner').innerHTML =
+                `ALUR PROSES ${meta.symbolNotation}(${clueX}): KERJAKAN FUNGSI DALAM <strong>${meta.innerName}(${clueX})</strong> DULU, LALU MASUKKAN KE FUNGSI LUAR <strong>${meta.outerName}</strong>`;
 
-            if (!showingInverseQuestion) {
-                // ==============================================================
-                // TAMPILAN SOAL 1: KOMPOSISI FUNGSI LINEAR (EASY & HARD SOAL 1)
-                // ==============================================================
-                document.getElementById('machineStageTag').innerHTML = isHard
-                    ? `Tahap 3 &bull; Soal 1/2: Komposisi Fungsi Linear (HARD MODE)`
-                    : `Tahap 3 &bull; Mesin Kode Komposisi Fungsi Linear (EASY MODE)`;
+            document.getElementById('pipeInputBadgeTitle').textContent = 'INPUT AWAL';
+            document.getElementById('pipeInputDisplay').textContent = `x = ${clueX}`;
+            document.getElementById('pipeInputSublabel').textContent = 'Dari Dekripsi';
+            document.getElementById('pipeArrow1Label').textContent = 'MASUK';
+            document.getElementById('nodeInnerBadgeTitle').textContent = `MESIN 1 (DALAM: ${meta.innerName})`;
+            document.getElementById('nodeInnerFormulaDisplay').textContent = innerFormulaStr;
+            document.getElementById('nodeOuterBadgeTitle').textContent = `MESIN 2 (LUAR: ${meta.outerName})`;
+            document.getElementById('nodeOuterFormulaDisplay').textContent = outerFormulaStr;
+            document.getElementById('pipeOutputBadgeTitle').textContent = 'ACCESS CODE';
+            document.getElementById('pipeOutputSublabel').textContent = meta.nestedNotation(clueX);
+            document.getElementById('machineTheoryNote').innerHTML =
+                `<strong>&#128218; Catatan Penting Detektif (Urutan Fungsi Linear):</strong><br>` +
+                `Pada komposisi <strong>${meta.symbolNotation}(x) = ${meta.nestedNotation('x')}</strong>, nilai <strong>x = ${clueX}</strong> wajib dimasukkan ke fungsi linear bagian dalam <strong>${meta.innerName}(x)</strong> terlebih dahulu, kemudian hasilnya dimasukkan ke fungsi linear luar <strong>${meta.outerName}(x)</strong>. Urutan sangat penting karena <strong>f(g(x)) &ne; g(f(x))</strong>!`;
+            document.getElementById('machineAttemptsCount').textContent = gameState.functionAttempts;
+            btnHint.innerHTML = gameState.functionHintLevel >= 3
+                ? '&#128161; LIHAT HINT (TERBUKA)'
+                : `&#128161; SHOW HINT (-${hintCost} Poin Hint)`;
 
-                document.getElementById('machineNarrativeText').innerHTML = isHard
-                    ? `"Tahap 3 Mode HARD memiliki <strong>2 pengaman matematika berurutan</strong>. Selesaikan <strong>Soal 1 (Komposisi Fungsi Linear)</strong> dengan input <strong>x = ${clueX}</strong> terlebih dahulu untuk membuka <strong>Soal 2 (Fungsi Invers)</strong>!"`
-                    : `"Pesan <strong>${gameState.decryptedMessage || gameState.plainWord}</strong> membuka kompartemen rahasia berisi angka awal <strong>x = ${clueX}</strong>. Sekarang hitung komposisi dua fungsi linear <strong>${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}</strong> untuk menghasilkan kode akses brankas!"`;
-
-                document.getElementById('machineTitleFormula').innerHTML = isHard
-                    ? `Soal 1 — Komposisi Fungsi Linear: ${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}`
-                    : `Mesin Komposisi Fungsi: ${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}`;
-
-                document.getElementById('machineGivenFunctionsText').innerHTML =
-                    `Diketahui fungsi linear: <strong>${fFormulaStr}</strong> dan <strong>${gFormulaStr}</strong> dengan nilai awal <strong>x = <span id="machineClueXLabel">${clueX}</span></strong>.`;
-
-                document.getElementById('machineSchematicBanner').innerHTML =
-                    `ALUR PROSES ${meta.symbolNotation}(${clueX}): KERJAKAN FUNGSI DALAM <strong>${meta.innerName}(${clueX})</strong> DULU, LALU MASUKKAN KE FUNGSI LUAR <strong>${meta.outerName}</strong>`;
-
-                document.getElementById('pipeInputBadgeTitle').textContent = 'INPUT AWAL';
-                document.getElementById('pipeInputDisplay').textContent = `x = ${clueX}`;
-                document.getElementById('pipeInputSublabel').textContent = 'Dari Dekripsi';
-                document.getElementById('pipeArrow1Label').textContent = 'MASUK';
-
-                document.getElementById('nodeInnerBadgeTitle').textContent = `MESIN 1 (DALAM: ${meta.innerName})`;
-                document.getElementById('nodeInnerFormulaDisplay').textContent = innerFormulaStr;
-                document.getElementById('nodeOuterBadgeTitle').textContent = `MESIN 2 (LUAR: ${meta.outerName})`;
-                document.getElementById('nodeOuterFormulaDisplay').textContent = outerFormulaStr;
-
-                document.getElementById('pipeOutputBadgeTitle').textContent = isHard ? 'OUTPUT SOAL 1' : 'ACCESS CODE';
-                document.getElementById('pipeOutputSublabel').textContent = meta.nestedNotation(clueX);
-
-                document.getElementById('machineTheoryNote').innerHTML =
-                    `<strong>&#128218; Catatan Penting Detektif (Urutan Fungsi Linear):</strong><br>` +
-                    `Pada komposisi <strong>${meta.symbolNotation}(x) = ${meta.nestedNotation('x')}</strong>, nilai <strong>x = ${clueX}</strong> wajib dimasukkan ke fungsi linear bagian dalam <strong>${meta.innerName}(x)</strong> terlebih dahulu, kemudian hasilnya dimasukkan ke fungsi linear luar <strong>${meta.outerName}(x)</strong>. Urutan sangat penting karena <strong>f(g(x)) &ne; g(f(x))</strong>!`;
-
-                document.getElementById('machineAttemptsCount').textContent = gameState.functionAttempts;
-
-                if (gameState.functionHintLevel >= 3) {
-                    btnHint.innerHTML = `&#128161; LIHAT HINT (TERBUKA)`;
-                } else {
-                    btnHint.innerHTML = `&#128161; SHOW HINT (-${hintCost} Poin Hint)`;
-                }
-
-                if (gameState.functionSolved) {
-                    // EASY Mode selesai
-                    inputEl.value = gameState.accessCode;
-                    inputEl.disabled = true;
-                    btnSubmit.disabled = true;
-                    btnHint.disabled = true;
-                    nextContainer.style.display = 'flex';
-                    nextBtn.innerHTML = `MENUJU BRANKAS RAHASIA (KODE: ${gameState.accessCode}) &#8594;`;
-
-                    nodeG.classList.add('energized');
-                    nodeF.classList.add('energized');
-                    nodeOut.classList.add('energized');
-
-                    document.getElementById('nodeGStatus').textContent =
-                        formatStepSubstitution(meta.innerName, meta.innerSpec, clueX, gameState.intermediateValue);
-                    document.getElementById('pipeMidValue').textContent =
-                        `${meta.innerName}(${clueX}) = ${gameState.intermediateValue}`;
-                    document.getElementById('nodeFStatus').textContent =
-                        formatStepSubstitution(meta.outerName, meta.outerSpec, gameState.intermediateValue, gameState.accessCode);
-                    document.getElementById('pipeOutputDisplay').textContent = gameState.accessCode;
-
-                    stampEl.textContent = 'ACCESS GRANTED';
-                    stampEl.classList.add('solved-stamp');
-
-                    feedbackBox.className = 'feedback-banner success';
-                    feedbackBox.innerHTML = `
-                        <span>&#9989;</span>
-                        <div>
-                            <strong>Mesin Fungsi Menyala! Access Code = ${gameState.accessCode}.</strong><br>
-                            Perhitungan tepat: <code>${formatStepSubstitution(meta.innerName, meta.innerSpec, clueX, gameState.intermediateValue)}</code>, lalu <code>${formatStepSubstitution(meta.outerName, meta.outerSpec, gameState.intermediateValue, gameState.accessCode)}</code>.
-                        </div>
-                    `;
-                } else {
-                    inputEl.disabled = gameState.gameOver;
-                    btnSubmit.disabled = gameState.gameOver;
-                    btnHint.disabled = gameState.gameOver;
-                    nextContainer.style.display = 'none';
-
-                    nodeG.classList.remove('energized');
-                    nodeF.classList.remove('energized');
-                    nodeOut.classList.remove('energized');
-
-                    document.getElementById('nodeGStatus').textContent = `Hitung ${meta.innerName}(${clueX}) terlebih dahulu`;
-                    document.getElementById('pipeMidValue').textContent = `${meta.innerName}(${clueX}) = ?`;
-                    document.getElementById('nodeFStatus').textContent = `Proses hasil ${meta.innerName}(${clueX}) ke ${meta.outerName}`;
-                    document.getElementById('pipeOutputDisplay').textContent = '??';
-
-                    stampEl.textContent = isHard ? 'SOAL 1: LINEAR' : 'CODE GENERATOR';
-                    stampEl.classList.remove('solved-stamp');
-                }
+            if (gameState.functionSolved) {
+                inputEl.value = String(gameState.accessCode);
+                inputEl.disabled = true;
+                btnSubmit.disabled = true;
+                btnHint.disabled = true;
+                nextContainer.style.display = 'flex';
+                nextBtn.innerHTML = `MENUJU BRANKAS RAHASIA (KODE: ${gameState.accessCode}) &#8594;`;
+                nodeG.classList.add('energized');
+                nodeF.classList.add('energized');
+                nodeOut.classList.add('energized');
+                document.getElementById('nodeGStatus').textContent =
+                    formatStepSubstitution(meta.innerName, meta.innerSpec, clueX, gameState.intermediateValue);
+                document.getElementById('pipeMidValue').textContent =
+                    `${meta.innerName}(${clueX}) = ${gameState.intermediateValue}`;
+                document.getElementById('nodeFStatus').textContent =
+                    formatStepSubstitution(meta.outerName, meta.outerSpec, gameState.intermediateValue, gameState.accessCode);
+                document.getElementById('pipeOutputDisplay').textContent = String(gameState.accessCode);
+                stampEl.textContent = 'ACCESS GRANTED';
+                stampEl.classList.add('solved-stamp');
+                feedbackBox.className = 'feedback-banner success';
+                feedbackBox.innerHTML = `
+                    <span>&#9989;</span>
+                    <div>
+                        <strong>Mesin Fungsi Menyala! Access Code = ${gameState.accessCode}.</strong><br>
+                        Perhitungan tepat: <code>${formatStepSubstitution(meta.innerName, meta.innerSpec, clueX, gameState.intermediateValue)}</code>, lalu <code>${formatStepSubstitution(meta.outerName, meta.outerSpec, gameState.intermediateValue, gameState.accessCode)}</code>.
+                    </div>
+                `;
             } else {
-                // ==============================================================
-                // TAMPILAN SOAL 2 (MODE HARD): FUNGSI INVERS f⁻¹(y)
-                // ==============================================================
-                const invSpec = gameState.inverseSpec;
-                const invFuncStr = formatFunctionFormula('f', invSpec);
-                const invFormulaX = formatInverseFormulaString(invSpec, 'x');
-                const invSign = invSpec.b >= 0 ? '-' : '+';
-                const invAbsB = Math.abs(invSpec.b);
-
-                document.getElementById('machineStageTag').innerHTML =
-                    `Tahap 3 &bull; Soal 2/2: Mesin Fungsi Invers (HARD MODE)`;
-                document.getElementById('machineNarrativeText').innerHTML =
-                    `"Soal 1 (Komposisi Fungsi Linear) telah terpecahkan! Kini tiba pada pengaman terakhir Mesin Kode: tentukan nilai <strong>Fungsi Invers f&#8315;&#185;(${invSpec.y})</strong> untuk menghasilkan Access Code Brankas!"`;
-
-                document.getElementById('machineTitleFormula').innerHTML =
-                    `Soal 2 — Fungsi Invers: Tentukan Nilai f&#8315;&#185;(${invSpec.y})`;
-                document.getElementById('machineGivenFunctionsText').innerHTML =
-                    `Diketahui fungsi linear: <strong>${invFuncStr}</strong> dan nilai output <strong>y = ${invSpec.y}</strong>. Tentukan nilai <strong>f&#8315;&#185;(${invSpec.y})</strong>!`;
-
-                document.getElementById('machineSchematicBanner').innerHTML =
-                    `ALUR MESIN FUNGSI INVERS: DARI PERSAMAAN <strong>y = ax + b</strong> &rArr; <strong>f&#8315;&#185;(x) = (x - b) / a</strong>`;
-
-                document.getElementById('pipeInputBadgeTitle').textContent = 'INPUT NILAI y';
-                document.getElementById('pipeInputDisplay').textContent = `y = ${invSpec.y}`;
-                document.getElementById('pipeInputSublabel').textContent = 'Output f(x)';
-                document.getElementById('pipeArrow1Label').textContent = 'INVERS';
-
-                document.getElementById('nodeInnerBadgeTitle').textContent = 'FUNGSI AWAL f(x)';
-                document.getElementById('nodeInnerFormulaDisplay').textContent = invFuncStr;
-
-                document.getElementById('nodeOuterBadgeTitle').textContent = 'RUMUS INVERS f⁻¹(x)';
-                document.getElementById('nodeOuterFormulaDisplay').textContent = invFormulaX;
-
-                document.getElementById('pipeOutputBadgeTitle').textContent = 'ACCESS CODE';
-                document.getElementById('pipeOutputSublabel').textContent = `f⁻¹(${invSpec.y})`;
-
-                document.getElementById('machineTheoryNote').innerHTML =
-                    `<strong>&#128218; Catatan Edukasi Detektif (Cara Menentukan Fungsi Invers):</strong><br>` +
-                    `Misalkan <strong>y = ax + b</strong>, maka <strong>ax = y - b</strong> sehingga diperoleh rumus fungsi invers: <strong>f&#8315;&#185;(x) = (x - b) / a</strong>.<br>` +
-                    `Untuk <strong>${invFuncStr}</strong>, rumus inversnya adalah <code>${invFormulaX}</code>. Substitusikan <strong>x = ${invSpec.y}</strong> untuk menemukan kode brankas!`;
-
-                document.getElementById('machineAttemptsCount').textContent =
-                    gameState.functionAttempts + gameState.inverseAttempts;
-
-                if (gameState.inverseHintLevel >= 3) {
-                    btnHint.innerHTML = `&#128161; LIHAT HINT INVERS (TERBUKA)`;
-                } else {
-                    btnHint.innerHTML = `&#128161; SHOW HINT (-${hintCost} Poin Hint)`;
-                }
-
-                if (gameState.inverseSolved && gameState.functionSolved) {
-                    inputEl.value = gameState.accessCode;
-                    inputEl.disabled = true;
-                    btnSubmit.disabled = true;
-                    btnHint.disabled = true;
-                    nextContainer.style.display = 'flex';
-                    nextBtn.innerHTML = `MENUJU BRANKAS RAHASIA (KODE: ${gameState.accessCode}) &#8594;`;
-
-                    nodeG.classList.add('energized');
-                    nodeF.classList.add('energized');
-                    nodeOut.classList.add('energized');
-
-                    const numVal = invSpec.y - invSpec.b;
-                    document.getElementById('nodeGStatus').textContent =
-                        `${invSpec.y} = ${invSpec.a}x ${invSpec.b >= 0 ? '+' : '-'} ${invAbsB}`;
-                    document.getElementById('pipeMidValue').textContent =
-                        `y - b = ${numVal}`;
-                    document.getElementById('nodeFStatus').textContent =
-                        formatInverseStepCalculation(invSpec);
-                    document.getElementById('pipeOutputDisplay').textContent = gameState.accessCode;
-
-                    stampEl.textContent = 'ACCESS GRANTED';
-                    stampEl.classList.add('solved-stamp');
-
-                    feedbackBox.className = 'feedback-banner success';
-                    feedbackBox.innerHTML = `
-                        <span>&#9989;</span>
-                        <div>
-                            <strong>Kedua Soal Mode HARD Selesai! Access Code Brankas = ${gameState.accessCode}.</strong><br>
-                            • Soal 1 (Linear): <code>${meta.symbolNotation}(${clueX}) = ${gameState.linearResult}</code><br>
-                            • Soal 2 (Invers): <code>${formatInverseStepCalculation(invSpec)}</code>
-                        </div>
-                    `;
-                } else {
-                    inputEl.disabled = gameState.gameOver;
-                    btnSubmit.disabled = gameState.gameOver;
-                    btnHint.disabled = gameState.gameOver;
-                    nextContainer.style.display = 'none';
-
-                    nodeG.classList.add('energized');
-                    nodeF.classList.remove('energized');
-                    nodeOut.classList.remove('energized');
-
-                    document.getElementById('nodeGStatus').textContent =
-                        `y = ${invSpec.a}x ${invSpec.b >= 0 ? '+' : '-'} ${invAbsB}`;
-                    document.getElementById('pipeMidValue').textContent =
-                        `Hitung (${invSpec.y} ${invSign} ${invAbsB})`;
-                    document.getElementById('nodeFStatus').textContent =
-                        `Bagi hasil dengan a = ${invSpec.a}`;
-                    document.getElementById('pipeOutputDisplay').textContent = '??';
-
-                    stampEl.textContent = 'SOAL 2: INVERS';
-                    stampEl.classList.remove('solved-stamp');
-                }
+                inputEl.disabled = gameState.gameOver;
+                btnSubmit.disabled = gameState.gameOver;
+                btnHint.disabled = gameState.gameOver;
+                nextContainer.style.display = 'none';
+                nodeG.classList.remove('energized');
+                nodeF.classList.remove('energized');
+                nodeOut.classList.remove('energized');
+                document.getElementById('nodeGStatus').textContent = `Hitung ${meta.innerName}(${clueX}) terlebih dahulu`;
+                document.getElementById('pipeMidValue').textContent = `${meta.innerName}(${clueX}) = ?`;
+                document.getElementById('nodeFStatus').textContent = `Proses hasil ${meta.innerName}(${clueX}) ke ${meta.outerName}`;
+                document.getElementById('pipeOutputDisplay').textContent = '??';
+                stampEl.textContent = isHard ? 'HARD MODE' : 'CODE GENERATOR';
+                stampEl.classList.remove('solved-stamp');
             }
         }
 
@@ -4186,148 +3844,65 @@
             const clueX = gameState.initialClueX !== null ? gameState.initialClueX : gameState.targetClueX;
             const meta = getActiveCompositionMeta();
 
-            // Cek apakah pemain sedang mengerjakan Soal 1 (Linear) atau Soal 2 (Invers di HARD)
-            const isSolvingInverse = isHard && gameState.linearSolved;
-
-            // Input kosong tidak mengurangi nyawa atau hint points
             if (rawVal === '') {
                 SoundEngine.error();
                 feedbackBox.className = 'feedback-banner error';
-                const targetLabel = isSolvingInverse
-                    ? `f&#8315;&#185;(${gameState.inverseSpec.y})`
-                    : `${meta.symbolNotation}(${clueX})`;
-                feedbackBox.innerHTML = `<span>&#9888;</span><span>Masukkan angka hasil perhitungan ${targetLabel} terlebih dahulu (tidak mengurangi Nyawa).</span>`;
+                feedbackBox.innerHTML = `<span>&#9888;</span><span>Masukkan angka hasil perhitungan ${meta.symbolNotation}(${clueX}) terlebih dahulu (tidak mengurangi Nyawa).</span>`;
                 return;
             }
 
             const numericAnswer = Number(rawVal);
-            if (Number.isNaN(numericAnswer)) {
+            if (!Number.isInteger(numericAnswer)) {
                 SoundEngine.error();
                 feedbackBox.className = 'feedback-banner error';
-                feedbackBox.innerHTML = `<span>&#9888;</span><span>Masukkan format angka yang valid.</span>`;
+                feedbackBox.innerHTML = `<span>&#9888;</span><span>Masukkan bilangan bulat yang valid.</span>`;
                 return;
             }
 
-            if (!isSolvingInverse) {
-                // ==========================================================
-                // VALIDASI SOAL 1: KOMPOSISI FUNGSI LINEAR
-                // ==========================================================
-                gameState.functionAttempts += 1;
+            gameState.functionAttempts += 1;
+            const compositionResult = composeFunctions(meta.outerFn, meta.innerFn, clueX);
+            const reverseResult = composeFunctions(meta.innerFn, meta.outerFn, clueX);
 
-                const compositionResult = composeFunctions(meta.outerFn, meta.innerFn, clueX);
-                const reverseResult = composeFunctions(meta.innerFn, meta.outerFn, clueX);
-
-                if (numericAnswer === compositionResult.finalValue) {
-                    SoundEngine.success();
-                    gameState.linearSolved = true;
-                    gameState.intermediateValue = compositionResult.innerValue;
-                    gameState.linearResult = compositionResult.finalValue;
-
-                    if (!isHard) {
-                        // Mode EASY: Soal 1 langsung menyelesaikan Tahap 3
-                        gameState.functionSolved = true;
-                        gameState.accessCode = compositionResult.finalValue;
-                        updateScore(25);
-                        unlockNextStage(5);
-                        renderAllUI();
-                    } else {
-                        // Mode HARD: Lanjut otomatis ke Soal 2 (Fungsi Invers)
-                        gameState.hardSubStage = 2;
-                        updateScore(25);
-                        inputEl.value = '';
-                        document.getElementById('machineHintBox').style.display = 'none';
-                        document.getElementById('machineHintBox').innerHTML = '';
-
-                        renderAllUI();
-
-                        feedbackBox.className = 'feedback-banner success';
-                        feedbackBox.innerHTML = `
-                            <span>&#9989;</span>
-                            <div>
-                                <strong>Soal 1 (Komposisi Fungsi Linear) Benar! Hasil = ${compositionResult.finalValue}.</strong><br>
-                                Sekarang selesaikan <strong>Soal 2 — Fungsi Invers</strong> di atas untuk membuka Access Code Brankas!
-                            </div>
-                        `;
-                        inputEl.focus();
-                    }
-                } else {
-                    SoundEngine.error();
-                    const lifeLost = deductLifePoints('Mesin Komposisi Fungsi Linear');
-                    let diagnosticMsg = `Coba hitung bertahap: masukkan <strong>x = ${clueX}</strong> ke fungsi dalam <code>${formatFunctionFormula(meta.innerName, meta.innerSpec)}</code> terlebih dahulu, lalu masukkan hasilnya ke fungsi luar <code>${formatFunctionFormula(meta.outerName, meta.outerSpec)}</code>.`;
-
-                    if (numericAnswer === reverseResult.finalValue) {
-                        diagnosticMsg = `Hati-hati! Angka <strong>${numericAnswer}</strong> adalah hasil dari urutan terbalik <code>${meta.reverseNestedNotation(clueX)} = ${reverseResult.finalValue}</code>. Untuk <strong>${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}</strong>, kerjakan fungsi dalam <code>${meta.innerName}(${clueX})</code> dulu baru fungsi luar <code>${meta.outerName}</code>!`;
-                    } else if (numericAnswer === compositionResult.innerValue) {
-                        diagnosticMsg = `Angka <strong>${numericAnswer}</strong> baru hasil tahap pertama <code>${meta.innerName}(${clueX}) = ${compositionResult.innerValue}</code>! Jangan lupa masukkan angka <strong>${compositionResult.innerValue}</strong> tersebut ke mesin kedua <code>${formatFunctionFormula(meta.outerName, meta.outerSpec)}</code>.`;
-                    }
-
-                    feedbackBox.className = 'feedback-banner error';
-                    feedbackBox.innerHTML = `
-                        <span>&#10060;</span>
-                        <div>
-                            <strong>Hasil ${numericAnswer} belum tepat! (-${lifeLost} Poin Nyawa, sisa Nyawa: ${gameState.lifePoints}/100)</strong><br>
-                            ${diagnosticMsg}
-                        </div>
-                    `;
-                    renderAllUI();
+            if (numericAnswer === compositionResult.finalValue) {
+                SoundEngine.success();
+                gameState.functionSolved = true;
+                gameState.intermediateValue = compositionResult.innerValue;
+                gameState.accessCode = compositionResult.finalValue;
+                updateScore(25);
+                unlockNextStage(5);
+                renderAllUI();
+                if (isHard) {
+                    navigateToScreen(5);
                 }
             } else {
-                // ==========================================================
-                // VALIDASI SOAL 2 (MODE HARD): FUNGSI INVERS f⁻¹(y)
-                // ==========================================================
-                gameState.inverseAttempts += 1;
+                SoundEngine.error();
+                const lifeLost = deductLifePoints('Mesin Komposisi Fungsi Linear');
+                let diagnosticMsg = `Coba hitung bertahap: masukkan <strong>x = ${clueX}</strong> ke fungsi dalam <code>${formatFunctionFormula(meta.innerName, meta.innerSpec)}</code> terlebih dahulu, lalu masukkan hasilnya ke fungsi luar <code>${formatFunctionFormula(meta.outerName, meta.outerSpec)}</code>.`;
 
-                const invSpec = gameState.inverseSpec;
-                const expectedInverseVal = evaluateLinearInverse(invSpec, invSpec.y);
-                const wrongSignNumeratorVal = (invSpec.y + invSpec.b) / invSpec.a;
-                const onlyNumeratorVal = invSpec.y - invSpec.b;
-
-                if (numericAnswer === expectedInverseVal) {
-                    SoundEngine.success();
-                    gameState.inverseSolved = true;
-                    gameState.inverseResult = expectedInverseVal;
-                    gameState.functionSolved = true;
-                    gameState.accessCode = expectedInverseVal;
-                    updateScore(35);
-                    unlockNextStage(5);
-                    renderAllUI();
-                } else {
-                    SoundEngine.error();
-                    const lifeLost = deductLifePoints('Mesin Fungsi Invers (Soal 2)');
-                    const signStr = invSpec.b >= 0 ? '-' : '+';
-                    const absB = Math.abs(invSpec.b);
-
-                    let diagnosticMsg = `Gunakan rumus fungsi invers: <code>y = ax + b &rArr; f⁻¹(x) = (x - b) / a</code>. Untuk <code>${formatFunctionFormula('f', invSpec)}</code> dan <code>y = ${invSpec.y}</code>, hitung <code>(${invSpec.y} ${signStr} ${absB}) / ${invSpec.a}</code>.`;
-
-                    if (numericAnswer === wrongSignNumeratorVal) {
-                        diagnosticMsg = `Perhatikan tanda konstanta <strong>b</strong> saat pindah ruas! Dari <code>${formatFunctionFormula('f', invSpec)}</code>, rumus inversnya adalah <code>${formatInverseFormulaString(invSpec, 'x')}</code>, sehingga pembilangnya <code>${invSpec.y} ${signStr} ${absB} = ${onlyNumeratorVal}</code>.`;
-                    } else if (numericAnswer === onlyNumeratorVal) {
-                        diagnosticMsg = `Angka <strong>${numericAnswer}</strong> baru nilai pembilang <code>(y - b) = ${onlyNumeratorVal}</code>! Jangan lupa dibagi dengan koefisien <strong>a = ${invSpec.a}</strong> sesuai rumus <code>f⁻¹(x) = (x - b) / a</code>.`;
-                    }
-
-                    feedbackBox.className = 'feedback-banner error';
-                    feedbackBox.innerHTML = `
-                        <span>&#10060;</span>
-                        <div>
-                            <strong>Hasil Invers ${numericAnswer} belum tepat! (-${lifeLost} Poin Nyawa, sisa Nyawa: ${gameState.lifePoints}/100)</strong><br>
-                            ${diagnosticMsg}
-                        </div>
-                    `;
-                    renderAllUI();
+                if (numericAnswer === reverseResult.finalValue) {
+                    diagnosticMsg = `Hati-hati! Angka <strong>${numericAnswer}</strong> adalah hasil dari urutan terbalik <code>${meta.reverseNestedNotation(clueX)} = ${reverseResult.finalValue}</code>. Untuk <strong>${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}</strong>, kerjakan fungsi dalam <code>${meta.innerName}(${clueX})</code> dulu baru fungsi luar <code>${meta.outerName}</code>!`;
+                } else if (numericAnswer === compositionResult.innerValue) {
+                    diagnosticMsg = `Angka <strong>${numericAnswer}</strong> baru hasil tahap pertama <code>${meta.innerName}(${clueX}) = ${compositionResult.innerValue}</code>! Jangan lupa masukkan angka <strong>${compositionResult.innerValue}</strong> tersebut ke mesin kedua <code>${formatFunctionFormula(meta.outerName, meta.outerSpec)}</code>.`;
                 }
+
+                feedbackBox.className = 'feedback-banner error';
+                feedbackBox.innerHTML = `
+                    <span>&#10060;</span>
+                    <div>
+                        <strong>Hasil ${numericAnswer} belum tepat! (-${lifeLost} Poin Nyawa, sisa Nyawa: ${gameState.lifePoints}/100)</strong><br>
+                        ${diagnosticMsg}
+                    </div>
+                `;
+                renderAllUI();
             }
         }
 
         function handleMachineHint() {
             if (gameState.functionSolved || gameState.gameOver) return;
 
-            const isHard = gameState.difficulty === 'HARD';
-            const isSolvingInverse = isHard && gameState.linearSolved;
             const hintBox = document.getElementById('machineHintBox');
             const feedbackBox = document.getElementById('machineFeedbackBox');
-
-            const stageKey = isSolvingInverse ? 'machine_inverse' : 'machine';
-            const res = tryConsumeHintPoints(stageKey, 3);
+            const res = tryConsumeHintPoints('machine', 3);
 
             if (res.status === 'insufficient') {
                 SoundEngine.error();
@@ -4343,63 +3918,33 @@
             }
 
             SoundEngine.click();
-
             const statusNote = res.status === 'already_unlocked'
-                ? `<em>(Seluruh petunjuk soal ini sudah terbuka — tidak mengurangi Hint Points lagi)</em>`
+                ? `<em>(Seluruh petunjuk tahap ini sudah terbuka ? tidak mengurangi Hint Points lagi)</em>`
                 : `<em>(-${res.cost} Hint Points &bull; Level Petunjuk ${res.level}/3 &bull; Sisa Hint Points: ${gameState.hintPoints}/100)</em>`;
+            const clueX = gameState.initialClueX !== null ? gameState.initialClueX : gameState.targetClueX;
+            const meta = getActiveCompositionMeta();
+            const step1 = composeFunctions(meta.outerFn, meta.innerFn, clueX);
+            const innerStepStr = formatStepSubstitution(meta.innerName, meta.innerSpec, clueX, step1.innerValue);
+            const outerProd = meta.outerSpec.a * step1.innerValue;
+            const outerSign = meta.outerSpec.b >= 0 ? '+' : '-';
+            const outerAbsB = Math.abs(meta.outerSpec.b);
 
-            if (!isSolvingInverse) {
-                // Petunjuk Soal 1: Komposisi Fungsi Linear
-                const clueX = gameState.initialClueX !== null ? gameState.initialClueX : gameState.targetClueX;
-                const meta = getActiveCompositionMeta();
-                const step1 = composeFunctions(meta.outerFn, meta.innerFn, clueX);
-                const innerStepStr = formatStepSubstitution(meta.innerName, meta.innerSpec, clueX, step1.innerValue);
-                const outerProd = meta.outerSpec.a * step1.innerValue;
-                const outerSign = meta.outerSpec.b >= 0 ? '+' : '-';
-                const outerAbsB = Math.abs(meta.outerSpec.b);
-
-                let stepsHtml = `1. Urutan pengerjaan <strong>${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}</strong>: kerjakan fungsi dalam <code>${formatFunctionFormula(meta.innerName, meta.innerSpec)}</code> untuk <code>x = ${clueX}</code>.`;
-                if (res.level >= 2) {
-                    stepsHtml += `<br>2. Hasil fungsi dalam: <code>${innerStepStr}</code>.`;
-                }
-                if (res.level >= 3) {
-                    stepsHtml += `<br>3. Substitusikan <strong>${step1.innerValue}</strong> ke fungsi luar <code>${formatFunctionFormula(meta.outerName, meta.outerSpec)}</code>: hitung <code>${meta.outerName}(${step1.innerValue}) = (${meta.outerSpec.a} × ${step1.innerValue}) ${outerSign} ${outerAbsB} = ${outerProd} ${outerSign} ${outerAbsB}</code>.`;
-                }
-
-                hintBox.style.display = 'flex';
-                hintBox.innerHTML = `
-                    <span>&#128161;</span>
-                    <div>
-                        <strong>Petunjuk Soal 1 — Komposisi Fungsi Linear:</strong> ${statusNote}<br>
-                        ${stepsHtml}
-                    </div>
-                `;
-            } else {
-                // Petunjuk Soal 2: Fungsi Invers Linear
-                const invSpec = gameState.inverseSpec;
-                const invFormulaX = formatInverseFormulaString(invSpec, 'x');
-                const sign = invSpec.b >= 0 ? '-' : '+';
-                const absB = Math.abs(invSpec.b);
-                const numerator = invSpec.y - invSpec.b;
-
-                let stepsHtml = `1. Dari persamaan <code>y = ax + b</code> (yaitu <code>${formatFunctionFormula('f', invSpec)}</code>), kita ubah menjadi <code>f⁻¹(x) = (x - b) / a</code> sehingga diperoleh rumus: <code>${invFormulaX}</code>.`;
-                if (res.level >= 2) {
-                    stepsHtml += `<br>2. Substitusikan nilai <strong>y = ${invSpec.y}</strong> ke bagian pembilang: <code>(${invSpec.y} ${sign} ${absB}) = ${numerator}</code>.`;
-                }
-                if (res.level >= 3) {
-                    stepsHtml += `<br>3. Bagi hasil pembilang dengan koefisien <strong>a = ${invSpec.a}</strong>: hitung <code>f⁻¹(${invSpec.y}) = ${numerator} / ${invSpec.a}</code>.`;
-                }
-
-                hintBox.style.display = 'flex';
-                hintBox.innerHTML = `
-                    <span>&#128161;</span>
-                    <div>
-                        <strong>Petunjuk Soal 2 — Fungsi Invers Linear:</strong> ${statusNote}<br>
-                        ${stepsHtml}
-                    </div>
-                `;
+            let stepsHtml = `1. Urutan pengerjaan <strong>${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}</strong>: kerjakan fungsi dalam <code>${formatFunctionFormula(meta.innerName, meta.innerSpec)}</code> untuk <code>x = ${clueX}</code>.`;
+            if (res.level >= 2) {
+                stepsHtml += `<br>2. Hasil fungsi dalam: <code>${innerStepStr}</code>.`;
+            }
+            if (res.level >= 3) {
+                stepsHtml += `<br>3. Substitusikan <strong>${step1.innerValue}</strong> ke fungsi luar <code>${formatFunctionFormula(meta.outerName, meta.outerSpec)}</code>: hitung <code>${meta.outerName}(${step1.innerValue}) = (${meta.outerSpec.a} &times; ${step1.innerValue}) ${outerSign} ${outerAbsB} = ${outerProd} ${outerSign} ${outerAbsB}</code>.`;
             }
 
+            hintBox.style.display = 'flex';
+            hintBox.innerHTML = `
+                <span>&#128161;</span>
+                <div>
+                    <strong>Petunjuk Komposisi Fungsi Linear:</strong> ${statusNote}<br>
+                    ${stepsHtml}
+                </div>
+            `;
             renderAllUI();
         }
 
@@ -4485,7 +4030,14 @@
             const meta = getActiveCompositionMeta();
             const clueX = gameState.initialClueX !== null ? gameState.initialClueX : gameState.targetClueX;
 
-            if (enteredNumber === gameState.accessCode) {
+            const isHardCodeValid = gameState.difficulty !== 'HARD' || (
+                Number.isInteger(enteredNumber) &&
+                enteredNumber >= 1 &&
+                enteredNumber <= 50 &&
+                gameState.currentKeypadInput === String(gameState.accessCode)
+            );
+
+            if (isHardCodeValid && enteredNumber === gameState.accessCode) {
                 SoundEngine.success();
                 gameState.safeUnlocked = true;
                 updateScore(30);
@@ -4498,9 +4050,8 @@
                 document.getElementById('keypadDisplayValue').textContent = 'ERR';
 
                 const lifeLost = deductLifePoints('Keypad Brankas Rahasia');
-                const codeOriginText = gameState.difficulty === 'HARD'
-                    ? `fungsi invers <code>f&#8315;&#185;(${gameState.inverseSpec.y}) = ${gameState.accessCode}</code>`
-                    : `komposisi fungsi <code>${meta.symbolNotation}(${clueX}) = ${gameState.accessCode}</code>`;
+                const codeOriginText =
+                    `komposisi fungsi <code>${meta.symbolNotation}(${clueX}) = ${gameState.accessCode}</code>`;
 
                 feedbackBox.className = 'feedback-banner error';
                 feedbackBox.innerHTML = `
@@ -4516,12 +4067,10 @@
 
         /* --- SCREEN 6: CASE CLOSED SUMMARY & DYNAMIC SOLUTION REVIEW --- */
         function renderScreen6Summary() {
-            const totalAttempts = gameState.cipherAttempts + gameState.functionAttempts + gameState.inverseAttempts + gameState.safeAttempts;
+            const totalAttempts = gameState.cipherAttempts + gameState.functionAttempts + gameState.safeAttempts;
             const totalHints = gameState.totalHintsPurchased;
             const clueX = gameState.initialClueX !== null ? gameState.initialClueX : gameState.targetClueX;
             const meta = getActiveCompositionMeta();
-            const isHard = gameState.difficulty === 'HARD';
-
             document.getElementById('finalVictoryBadge').innerHTML =
                 `INVESTIGASI TUNTAS &bull; ${gameState.caseId} (${gameState.difficulty} MODE)`;
             document.getElementById('finalScoreStat').textContent = gameState.score;
@@ -4536,11 +4085,8 @@
             }
             document.getElementById('finalRankStat').textContent = rankTitle;
 
-            const stage3SummaryHtml = isHard
-                ? `<div><strong>Tahap 3 — Mesin Fungsi (2 Soal Berurutan):</strong><br>` +
-                  `• <em>Soal 1 (Linear — Selesai):</em> Menghitung <code>${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)} = ${gameState.linearResult}</code>.<br>` +
-                  `• <em>Soal 2 (Invers — Selesai):</em> Dari <code>${formatFunctionFormula('f', gameState.inverseSpec)}</code>, menghitung <code>${formatInverseStepCalculation(gameState.inverseSpec)}</code> sebagai Access Code.</div>`
-                : `<div><strong>Tahap 3 — Komposisi Fungsi Linear:</strong> Menghitung <code>${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}</code> dengan <code>${meta.innerName}(${clueX}) = ${gameState.intermediateValue}</code> dan <code>${meta.outerName}(${gameState.intermediateValue}) = ${gameState.accessCode}</code>.</div>`;
+            const stage3SummaryHtml =
+                `<div><strong>Tahap 3 — Komposisi Fungsi Linear:</strong> Menghitung <code>${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}</code> dengan <code>${meta.innerName}(${clueX}) = ${gameState.intermediateValue}</code> dan <code>${meta.outerName}(${gameState.intermediateValue}) = ${gameState.accessCode}</code>. Hasilnya menjadi Access Code.</div>`;
 
             const summaryEl = document.getElementById('finalChecklistSummary');
             summaryEl.innerHTML = `
@@ -4573,7 +4119,6 @@
             const shift = gameState.cipherShift;
             const clueX = gameState.initialClueX !== null ? gameState.initialClueX : gameState.targetClueX;
             const meta = getActiveCompositionMeta();
-            const isHard = gameState.difficulty === 'HARD';
 
             const letterBreakdown = gameState.cipherText.split('').map(c => {
                 const cPos = c.charCodeAt(0) - 64;
@@ -4591,33 +4136,6 @@
             const revStep1Str = formatStepSubstitution(meta.outerName, meta.outerSpec, clueX, reverseComp.innerValue);
             const revStep2Str = formatStepSubstitution(meta.innerName, meta.innerSpec, reverseComp.innerValue, reverseComp.finalValue);
 
-            let inverseSolutionBlockHtml = '';
-            if (isHard && gameState.inverseSpec) {
-                const invSpec = gameState.inverseSpec;
-                const sign = invSpec.b >= 0 ? '-' : '+';
-                const absB = Math.abs(invSpec.b);
-                const numerator = invSpec.y - invSpec.b;
-                inverseSolutionBlockHtml = `
-                    <div class="solution-block">
-                        <h4>Bagian 3: Fungsi Invers Linear f&#8315;&#185;(${invSpec.y}) (Soal 2 Mode HARD)</h4>
-                        <p style="font-size: 0.9rem; line-height: 1.55;">
-                            Diketahui fungsi linear <strong>${formatFunctionFormula('f', invSpec)}</strong> dan nilai output <strong>y = ${invSpec.y}</strong>.
-                        </p>
-                        <div class="math-step-code">
-                            Langkah 1 (Menentukan Rumus Fungsi Invers):<br>
-                            y = ${invSpec.a}x ${invSpec.b >= 0 ? '+' : '-'} ${absB}<br>
-                            ${invSpec.a}x = y ${sign} ${absB}<br>
-                            x = (y ${sign} ${absB}) / ${invSpec.a}<br>
-                            Sehingga rumus fungsi inversnya adalah: ${formatInverseFormulaString(invSpec, 'x')}<br><br>
-                            Langkah 2 (Substitusi nilai y = ${invSpec.y}):<br>
-                            f&#8315;&#185;(${invSpec.y}) = (${invSpec.y} ${sign} ${absB}) / ${invSpec.a}<br>
-                            f&#8315;&#185;(${invSpec.y}) = ${numerator} / ${invSpec.a} = ${invSpec.answer}<br><br>
-                            Jadi, hasil akhir f&#8315;&#185;(${invSpec.y}) = ${invSpec.answer} (Kode Akses Brankas).
-                        </div>
-                    </div>
-                `;
-            }
-
             container.innerHTML = `
                 <div class="solution-block">
                     <h4>Bagian 1: Dekripsi Sandi Caesar (${gameState.caseId})</h4>
@@ -4633,7 +4151,7 @@
                 </div>
 
                 <div class="solution-block">
-                    <h4>Bagian 2: Komposisi Dua Fungsi Linear ${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}${isHard ? ' (Soal 1 Mode HARD)' : ''}</h4>
+                    <h4>Bagian 2: Komposisi Dua Fungsi Linear ${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}</h4>
                     <p style="font-size: 0.9rem; line-height: 1.55;">
                         Diketahui dua fungsi linear: <strong>${formatFunctionFormula('f', gameState.fSpec)}</strong> dan <strong>${formatFunctionFormula('g', gameState.gSpec)}</strong> dengan input <strong>x = ${clueX}</strong>.
                     </p>
@@ -4643,7 +4161,7 @@
                         ${step1Str}<br><br>
                         Langkah 2 (Substitusi hasil ${meta.innerName}(${clueX}) = ${forwardComp.innerValue} ke fungsi linear bagian luar ${meta.outerName}):<br>
                         ${step2Str}<br><br>
-                        Jadi, hasil komposisi ${meta.symbolNotation}(${clueX}) = ${forwardComp.finalValue}${isHard ? ' (Membuka Soal 2: Fungsi Invers).' : ' (Kode Akses Brankas).'}
+                        Jadi, hasil komposisi ${meta.symbolNotation}(${clueX}) = ${forwardComp.finalValue} (Kode Akses Brankas).
                     </div>
                     <p style="font-size: 0.88rem; line-height: 1.5; margin-top: 0.5rem; color: var(--wood-dark);">
                         <strong>Mengapa urutan fungsi penting pada kasus ini?</strong><br>
@@ -4654,7 +4172,6 @@
                     </p>
                 </div>
 
-                ${inverseSolutionBlockHtml}
             `;
         }
 
@@ -4669,7 +4186,6 @@
             const bodyEl = document.getElementById('evidenceModalBody');
             const meta = getActiveCompositionMeta();
             const clueX = gameState.initialClueX !== null ? gameState.initialClueX : gameState.targetClueX;
-            const isHard = gameState.difficulty === 'HARD';
 
             if (type === 'letter' && gameState.envelopeOpened) {
                 titleEl.textContent = `📩 Barang Bukti #1: Surat Misterius (${gameState.caseId})`;
@@ -4683,22 +4199,12 @@
                     <p>Dengan mendekripsi <strong>${gameState.cipherText}</strong> menggunakan Sandi Caesar (geser -${gameState.cipherShift}), diperoleh kata <strong>${gameState.decryptedMessage}</strong>.</p>
                     <div class="math-step-code">${gameState.cipherText} &rarr; ${gameState.decryptedMessage}<br>Petunjuk Angka Awal: x = ${clueX}</div>
                 `;
-            } else if (type === 'machine' && (gameState.functionSolved || (isHard && gameState.linearSolved))) {
+            } else if (type === 'machine' && gameState.functionSolved) {
                 titleEl.textContent = '⚙️ Barang Bukti #3: Catatan Mesin Fungsi';
-                if (!isHard) {
-                    bodyEl.innerHTML = `
-                        <p>Hasil perhitungan komposisi fungsi linear <strong>${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}</strong>:</p>
-                        <div class="math-step-code">1. ${formatStepSubstitution(meta.innerName, meta.innerSpec, clueX, gameState.intermediateValue)}<br>2. ${formatStepSubstitution(meta.outerName, meta.outerSpec, gameState.intermediateValue, gameState.accessCode)}<br>Kode Akses Brankas = ${gameState.accessCode}</div>
-                    `;
-                } else {
-                    const invStatusHtml = gameState.inverseSolved
-                        ? `<br><br><strong>Soal 2 (Fungsi Invers — Selesai):</strong><br>${formatFunctionFormula('f', gameState.inverseSpec)} &rArr; ${formatInverseFormulaString(gameState.inverseSpec, 'x')}<br>${formatInverseStepCalculation(gameState.inverseSpec)}<br>Kode Akses Brankas = ${gameState.accessCode}`
-                        : `<br><br><strong>Soal 2 (Fungsi Invers — Belum Selesai):</strong><br>Selesaikan <code>f⁻¹(${gameState.inverseSpec.y})</code> pada Mesin Fungsi untuk mendapatkan Kode Brankas.`;
-                    bodyEl.innerHTML = `
-                        <p>Catatan progres perhitungan Mode HARD pada Mesin Fungsi:</p>
-                        <div class="math-step-code"><strong>Soal 1 (Komposisi Linear — Selesai):</strong><br>1. ${formatStepSubstitution(meta.innerName, meta.innerSpec, clueX, gameState.intermediateValue)}<br>2. ${formatStepSubstitution(meta.outerName, meta.outerSpec, gameState.intermediateValue, gameState.linearResult)}${invStatusHtml}</div>
-                    `;
-                }
+                bodyEl.innerHTML = `
+                    <p>Hasil perhitungan komposisi fungsi linear <strong>${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}</strong>:</p>
+                    <div class="math-step-code">1. ${formatStepSubstitution(meta.innerName, meta.innerSpec, clueX, gameState.intermediateValue)}<br>2. ${formatStepSubstitution(meta.outerName, meta.outerSpec, gameState.intermediateValue, gameState.accessCode)}<br>Kode Akses Brankas = ${gameState.accessCode}</div>
+                `;
             } else if (type === 'artifact' && gameState.safeUnlocked) {
                 titleEl.textContent = '🏆 Barang Bukti #4: Artefak Astrolab Emas';
                 bodyEl.innerHTML = `
