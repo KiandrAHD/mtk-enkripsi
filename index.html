@@ -2395,7 +2395,7 @@
                 <h4>3. Dua Mode Kesulitan (EASY &amp; HARD)</h4>
                 <ul style="padding-left: 1.2rem; font-size: 0.92rem; line-height: 1.6;">
                     <li><strong>MODE EASY (Detektif Muda):</strong> Setelah sandi Caesar, selesaikan soal komposisi dengan koefisien 1–2, konstanta 0–3, dan x = 1–3; lalu soal invers dengan a = 1–3, b = 0–5, serta input x = 1–5. Hasil invers menjadi kode brankas.</li>
-                    <li><strong>MODE HARD (Master Detektif):</strong> Setelah sandi Caesar, selesaikan komposisi dengan koefisien 2–4, konstanta 1–4, dan x = 2–4; lalu soal invers dengan a = 2–4, b = 1–6, serta input x = 3–8. Urutan komposisi bervariasi dan hasil komposisi tidak lebih dari 70.</li>
+                    <li><strong>MODE HARD (Master Detektif):</strong> Setelah sandi Caesar, selesaikan komposisi dengan koefisien 2–5, konstanta -8 sampai 8, dan x = 3–6; lalu soal invers dengan a = 3–5, b = -9 sampai 9, serta input x = 6–12. Urutan komposisi bervariasi dan hasil komposisi positif tidak lebih dari 150.</li>
                 </ul>
             </div>
 
@@ -3052,19 +3052,19 @@
             }
 
             const recentSignatures = getRecentCaseHistory();
-            const xMin = isHard ? 2 : 1;
-            const xMax = isHard ? 4 : 3;
+            const xMin = isHard ? 3 : 1;
+            const xMax = isHard ? 6 : 3;
             const coefficientMin = isHard ? 2 : 1;
-            const coefficientMax = isHard ? 4 : 2;
-            const constantMin = isHard ? -4 : 0;
-            const constantMax = isHard ? 6 : 3;
-            const compositionMax = isHard ? 100 : 30;
-            const inverseAMin = isHard ? 2 : 1;
-            const inverseAMax = isHard ? 4 : 2;
-            const inverseBMin = isHard ? -5 : 0;
-            const inverseBMax = isHard ? 6 : 4;
-            const inverseXMin = isHard ? 4 : 2;
-            const inverseXMax = isHard ? 8 : 5;
+            const coefficientMax = isHard ? 5 : 2;
+            const constantMin = isHard ? -8 : 0;
+            const constantMax = isHard ? 8 : 3;
+            const compositionMax = isHard ? 150 : 30;
+            const inverseAMin = isHard ? 3 : 1;
+            const inverseAMax = isHard ? 5 : 2;
+            const inverseBMin = isHard ? -9 : 0;
+            const inverseBMax = isHard ? 9 : 4;
+            const inverseXMin = isHard ? 6 : 2;
+            const inverseXMax = isHard ? 12 : 5;
             const compositionOrders = ['fog', 'gof'];
 
             function createCandidate(plainWord, shift, targetX, fSpec, gSpec, compositionOrder, inverseSpec) {
@@ -3075,8 +3075,9 @@
                 const compositionResult = compositionOrder === 'fog' ? fogVal : gofVal;
                 const inverseResult = (inverseSpec.y - inverseSpec.b) / inverseSpec.a;
                 const signature =
-                    `${difficulty}|${targetX}|L_${fSpec.a}_${fSpec.b}|L_${gSpec.a}_${gSpec.b}|${compositionOrder}` +
-                    `|I_${inverseSpec.a}_${inverseSpec.b}_${inverseSpec.answer}`;
+                    `${difficulty}|W_${plainWord}|C_${shift}|X_${targetX}` +
+                    `|F_${fSpec.a}_${fSpec.b}|G_${gSpec.a}_${gSpec.b}|${compositionOrder}` +
+                    `|I_${inverseSpec.a}_${inverseSpec.b}_${inverseSpec.answer}_${inverseSpec.y}`;
                 const valuesAreIntegers = [
                     targetX,
                     gOfX,
@@ -3104,8 +3105,8 @@
                     inverseSpec.b <= inverseBMax &&
                     inverseSpec.answer >= inverseXMin &&
                     inverseSpec.answer <= inverseXMax &&
-                    inverseSpec.y >= -8 &&
-                    inverseSpec.y <= 38 &&
+                    inverseSpec.y >= (isHard ? 1 : -8) &&
+                    inverseSpec.y <= (isHard ? 69 : 38) &&
                     inverseResult === inverseSpec.answer;
 
                 if (
@@ -3115,10 +3116,12 @@
                     targetX > xMax ||
                     compositionResult < 1 ||
                     compositionResult > compositionMax ||
-                    gOfX < -20 ||
-                    gOfX > 100 ||
-                    fOfX < -20 ||
-                    fOfX > 100 ||
+                    gOfX < (isHard ? -30 : -20) ||
+                    gOfX > (isHard ? 38 : 100) ||
+                    fOfX < (isHard ? -30 : -20) ||
+                    fOfX > (isHard ? 38 : 100) ||
+                    (isHard && !(fSpec.b < 0 || gSpec.b < 0)) ||
+                    (isHard && fogVal === gofVal) ||
                     !inverseIsValid ||
                     recentSignatures.includes(signature)
                 ) {
@@ -3146,7 +3149,7 @@
             }
 
             let candidate = null;
-            for (let attempt = 0; attempt < 200 && !candidate; attempt++) {
+            for (let attempt = 0; attempt < 800 && !candidate; attempt++) {
                 const plainWord = randomChoice(wordPool);
                 const shift = isHard ? randomInt(4, 13) : randomInt(1, 5);
                 const targetX = randomInt(xMin, xMax);
@@ -3183,45 +3186,36 @@
             if (!candidate) {
                 const plainWord = randomChoice(wordPool);
                 const shift = isHard ? randomInt(4, 13) : randomInt(1, 5);
-
-                search:
-                for (let targetX = xMin; targetX <= xMax; targetX++) {
-                    for (let fA = coefficientMin; fA <= coefficientMax; fA++) {
-                        for (let fB = constantMin; fB <= constantMax; fB++) {
-                            for (let gA = coefficientMin; gA <= coefficientMax; gA++) {
-                                for (let gB = constantMin; gB <= constantMax; gB++) {
-                                    for (const compositionOrder of compositionOrders) {
-                                        for (let inverseA = inverseAMin; inverseA <= inverseAMax; inverseA++) {
-                                            for (let inverseB = inverseBMin; inverseB <= inverseBMax; inverseB++) {
-                                                for (let inverseX = inverseXMin; inverseX <= inverseXMax; inverseX++) {
-                                                    const fSpec = { type: 'linear', a: fA, b: fB };
-                                                    const gSpec = { type: 'linear', a: gA, b: gB };
-                                                    const inverseSpec = {
-                                                        type: 'linear',
-                                                        a: inverseA,
-                                                        b: inverseB,
-                                                        answer: inverseX,
-                                                        x: inverseX,
-                                                        y: inverseA * inverseX + inverseB
-                                                    };
-                                                    candidate = createCandidate(
-                                                        plainWord,
-                                                        shift,
-                                                        targetX,
-                                                        fSpec,
-                                                        gSpec,
-                                                        compositionOrder,
-                                                        inverseSpec
-                                                    );
-                                                    if (candidate) break search;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                for (let attempt = 0; attempt < 5000 && !candidate; attempt++) {
+                    const targetX = randomInt(xMin, xMax);
+                    const fSpec = {
+                        type: 'linear',
+                        a: randomInt(coefficientMin, coefficientMax),
+                        b: randomInt(constantMin, constantMax)
+                    };
+                    const gSpec = {
+                        type: 'linear',
+                        a: randomInt(coefficientMin, coefficientMax),
+                        b: randomInt(constantMin, constantMax)
+                    };
+                    const compositionOrder = randomChoice(compositionOrders);
+                    const inverseSpec = {
+                        type: 'linear',
+                        a: randomInt(inverseAMin, inverseAMax),
+                        b: randomInt(inverseBMin, inverseBMax),
+                        answer: randomInt(inverseXMin, inverseXMax)
+                    };
+                    inverseSpec.x = inverseSpec.answer;
+                    inverseSpec.y = inverseSpec.a * inverseSpec.answer + inverseSpec.b;
+                    candidate = createCandidate(
+                        plainWord,
+                        shift,
+                        targetX,
+                        fSpec,
+                        gSpec,
+                        compositionOrder,
+                        inverseSpec
+                    );
                 }
             }
 
@@ -4198,9 +4192,6 @@
                 const meta = getActiveCompositionMeta();
                 const step1 = composeFunctions(meta.outerFn, meta.innerFn, clueX);
                 const innerStepStr = formatStepSubstitution(meta.innerName, meta.innerSpec, clueX, step1.innerValue);
-                const outerProd = meta.outerSpec.a * step1.innerValue;
-                const outerSign = meta.outerSpec.b >= 0 ? '+' : '-';
-                const outerAbsB = Math.abs(meta.outerSpec.b);
 
                 hintTitle = 'Petunjuk Komposisi Fungsi Linear';
                 stepsHtml = `1. Urutan pengerjaan <strong>${meta.symbolNotation}(${clueX}) = ${meta.nestedNotation(clueX)}</strong>: kerjakan fungsi dalam <code>${formatFunctionFormula(meta.innerName, meta.innerSpec)}</code> untuk <code>x = ${clueX}</code>.`;
@@ -4208,7 +4199,13 @@
                     stepsHtml += `<br>2. Hasil fungsi dalam: <code>${innerStepStr}</code>.`;
                 }
                 if (res.level >= 3) {
-                    stepsHtml += `<br>3. Substitusikan <strong>${step1.innerValue}</strong> ke fungsi luar <code>${formatFunctionFormula(meta.outerName, meta.outerSpec)}</code>: hitung <code>${meta.outerName}(${step1.innerValue}) = (${meta.outerSpec.a} &times; ${step1.innerValue}) ${outerSign} ${outerAbsB} = ${outerProd} ${outerSign} ${outerAbsB}</code>.`;
+                    const finalStep = formatStepSubstitution(
+                        meta.outerName,
+                        meta.outerSpec,
+                        step1.innerValue,
+                        step1.finalValue
+                    );
+                    stepsHtml += `<br>3. Substitusikan <strong>${step1.innerValue}</strong> ke fungsi luar: <code>${finalStep}</code>.`;
                 }
             }
 
