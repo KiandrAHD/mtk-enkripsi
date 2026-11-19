@@ -2964,15 +2964,23 @@
         }
 
         function formatInverseFormulaString(inverseSpec) {
-            const numerator = inverseSpec.b === 0
-                ? 'y'
-                : `(y - ${inverseSpec.b})`;
+            let numerator = 'y';
+            if (inverseSpec.b > 0) {
+                numerator = `(y - ${inverseSpec.b})`;
+            } else if (inverseSpec.b < 0) {
+                numerator = `(y + ${Math.abs(inverseSpec.b)})`;
+            }
             return `x = ${numerator} / ${inverseSpec.a}`;
         }
 
         function formatInverseStepCalculation(inverseSpec) {
             const numerator = inverseSpec.y - inverseSpec.b;
-            return `x = (${inverseSpec.y} - ${inverseSpec.b}) / ${inverseSpec.a} = ${numerator} / ${inverseSpec.a} = ${inverseSpec.answer}`;
+            const numeratorExpression = inverseSpec.b > 0
+                ? `(${inverseSpec.y} - ${inverseSpec.b})`
+                : inverseSpec.b < 0
+                    ? `(${inverseSpec.y} + ${Math.abs(inverseSpec.b)})`
+                    : `(${inverseSpec.y})`;
+            return `x = ${numeratorExpression} / ${inverseSpec.a} = ${numerator} / ${inverseSpec.a} = ${inverseSpec.answer}`;
         }
 
         /**
@@ -3048,16 +3056,16 @@
             const xMax = isHard ? 4 : 3;
             const coefficientMin = isHard ? 2 : 1;
             const coefficientMax = isHard ? 4 : 2;
-            const constantMin = isHard ? 1 : 0;
-            const constantMax = isHard ? 4 : 3;
-            const compositionMax = isHard ? 70 : 25;
+            const constantMin = isHard ? -4 : 0;
+            const constantMax = isHard ? 6 : 3;
+            const compositionMax = isHard ? 100 : 30;
             const inverseAMin = isHard ? 2 : 1;
-            const inverseAMax = isHard ? 4 : 3;
-            const inverseBMin = isHard ? 1 : 0;
-            const inverseBMax = isHard ? 6 : 5;
-            const inverseXMin = isHard ? 3 : 1;
+            const inverseAMax = isHard ? 4 : 2;
+            const inverseBMin = isHard ? -5 : 0;
+            const inverseBMax = isHard ? 6 : 4;
+            const inverseXMin = isHard ? 4 : 2;
             const inverseXMax = isHard ? 8 : 5;
-            const compositionOrders = isHard ? ['fog', 'gof'] : ['fog'];
+            const compositionOrders = ['fog', 'gof'];
 
             function createCandidate(plainWord, shift, targetX, fSpec, gSpec, compositionOrder, inverseSpec) {
                 const gOfX = evalFunctionSpec(gSpec, targetX);
@@ -3096,7 +3104,8 @@
                     inverseSpec.b <= inverseBMax &&
                     inverseSpec.answer >= inverseXMin &&
                     inverseSpec.answer <= inverseXMax &&
-                    inverseSpec.y <= 40 &&
+                    inverseSpec.y >= -8 &&
+                    inverseSpec.y <= 38 &&
                     inverseResult === inverseSpec.answer;
 
                 if (
@@ -3106,8 +3115,11 @@
                     targetX > xMax ||
                     compositionResult < 1 ||
                     compositionResult > compositionMax ||
+                    gOfX < -20 ||
+                    gOfX > 100 ||
+                    fOfX < -20 ||
+                    fOfX > 100 ||
                     !inverseIsValid ||
-                    (isHard && fogVal === gofVal) ||
                     recentSignatures.includes(signature)
                 ) {
                     return null;
@@ -3126,12 +3138,15 @@
                     gSpec,
                     compositionOrder,
                     inverseSpec,
+                    compositionResult,
+                    intermediateValue: compositionOrder === 'fog' ? gOfX : fOfX,
+                    inverseAnswer: inverseSpec.answer,
                     signature
                 };
             }
 
             let candidate = null;
-            for (let attempt = 0; attempt < 100 && !candidate; attempt++) {
+            for (let attempt = 0; attempt < 200 && !candidate; attempt++) {
                 const plainWord = randomChoice(wordPool);
                 const shift = isHard ? randomInt(4, 13) : randomInt(1, 5);
                 const targetX = randomInt(xMin, xMax);
@@ -3238,6 +3253,21 @@
             return {
                 caseId: config.caseId,
                 difficulty: config.difficulty,
+                caseConfig: {
+                    signature: config.signature,
+                    composition: {
+                        targetX: config.targetX,
+                        fSpec: config.fSpec,
+                        gSpec: config.gSpec,
+                        order: config.compositionOrder,
+                        intermediateValue: config.intermediateValue,
+                        answer: config.compositionResult
+                    },
+                    inverse: {
+                        spec: config.inverseSpec,
+                        answer: config.inverseAnswer
+                    }
+                },
                 currentScreen: startAtScreen,
                 highestUnlockedScreen: startAtScreen,
                 score: 100,
@@ -4055,7 +4085,10 @@
             if (gameState.functionSubStage === 1) {
                 const clueX = gameState.initialClueX !== null ? gameState.initialClueX : gameState.targetClueX;
                 const meta = getActiveCompositionMeta();
-                const compositionResult = composeFunctions(meta.outerFn, meta.innerFn, clueX);
+                const compositionResult = {
+                    innerValue: gameState.caseConfig.composition.intermediateValue,
+                    finalValue: gameState.caseConfig.composition.answer
+                };
                 const reverseResult = composeFunctions(meta.innerFn, meta.outerFn, clueX);
                 gameState.functionAttempts += 1;
 
@@ -4093,7 +4126,7 @@
                 }
             } else {
                 const inverseSpec = gameState.inverseSpec;
-                const expectedAnswer = evaluateLinearInverse(inverseSpec);
+                const expectedAnswer = gameState.caseConfig.inverse.answer;
                 gameState.inverseAttempts += 1;
 
                 if (Number.isInteger(expectedAnswer) && numericAnswer === expectedAnswer) {
@@ -4153,9 +4186,9 @@
                 const inverseSpec = gameState.inverseSpec;
                 const numerator = inverseSpec.y - inverseSpec.b;
                 hintTitle = 'Petunjuk Fungsi Invers';
-                stepsHtml = `1. Susun ulang <code>y = ax + b</code> menjadi <code>x = (y - b) / a</code>.`;
+                stepsHtml = `1. Susun ulang <code>${formatFunctionFormula('f', inverseSpec).replace('f(x) = ', 'y = ')}</code> menjadi <code>${formatInverseFormulaString(inverseSpec)}</code>.`;
                 if (res.level >= 2) {
-                    stepsHtml += `<br>2. Substitusi nilai: <code>x = (${inverseSpec.y} - ${inverseSpec.b}) / ${inverseSpec.a} = ${numerator} / ${inverseSpec.a}</code>.`;
+                    stepsHtml += `<br>2. Substitusi nilai: <code>${formatInverseStepCalculation(inverseSpec).replace(` = ${inverseSpec.answer}`, '')}</code>.`;
                 }
                 if (res.level >= 3) {
                     stepsHtml += `<br>3. Hasilnya <strong>x = ${inverseSpec.answer}</strong>; bilangan ini juga menjadi kode brankas.`;
